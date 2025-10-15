@@ -42,17 +42,22 @@ const userRepo = __importStar(require("../repositories/userRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
+function userDisplayName(u) {
+    return [u.firstName, u.lastName].filter(Boolean).join(' ') || null;
+}
 async function signup(payload) {
     const existing = await userRepo.findUserByEmail(payload.email);
     if (existing)
         throw new Error('email_in_use');
     const hashed = await bcrypt_1.default.hash(payload.password, 10);
     // default role/type lookup
-    const defaultRole = await (await Promise.resolve().then(() => __importStar(require('../prisma')))).default.userRole.findFirst({ where: { name: 'USER' } });
-    const defaultType = await (await Promise.resolve().then(() => __importStar(require('../prisma')))).default.userType.findFirst({ where: { name: 'CUSTOMER' } });
-    const user = await userRepo.createUser({ email: payload.email, password: hashed, name: payload.name, roleId: defaultRole ? defaultRole.id : undefined, typeId: defaultType ? defaultType.id : undefined });
-    const token = jsonwebtoken_1.default.sign({ userId: user.id, role: defaultRole ? defaultRole.name : 'USER' }, JWT_SECRET, { expiresIn: '7d' });
-    return { user: { id: user.id, email: user.email, name: user.name }, token };
+    const prisma = await Promise.resolve().then(() => __importStar(require('../prisma')));
+    const defaultRole = await prisma.default.role.findFirst({ where: { code: 'USER' } });
+    const defaultType = await prisma.default.userType.findFirst({ where: { name: 'CUSTOMER' } });
+    const user = await userRepo.createUser({ email: payload.email, password: hashed, firstName: payload.firstName, lastName: payload.lastName, roleId: defaultRole ? defaultRole.id : undefined, typeId: defaultType ? defaultType.id : undefined });
+    const roleCode = defaultRole ? defaultRole.code : 'USER';
+    const token = jsonwebtoken_1.default.sign({ userId: user.id, role: roleCode }, JWT_SECRET, { expiresIn: '7d' });
+    return { user: { id: user.id, email: payload.email, name: userDisplayName(user) }, token };
 }
 async function login(payload) {
     const user = await userRepo.findUserByEmail(payload.email);
@@ -61,6 +66,10 @@ async function login(payload) {
     const ok = await bcrypt_1.default.compare(payload.password, user.password);
     if (!ok)
         throw new Error('invalid_credentials');
-    const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role ? user.role.name : 'USER' }, JWT_SECRET, { expiresIn: '7d' });
-    return { user: { id: user.id, email: user.email, name: user.name }, token };
+    const role = user.userRoles && user.userRoles.length ? user.userRoles[0].role : null;
+    const roleCode = role ? role.code : 'USER';
+    const token = jsonwebtoken_1.default.sign({ userId: user.id, role: roleCode }, JWT_SECRET, { expiresIn: '7d' });
+    // get primary email
+    const primaryEmail = user.emails && user.emails.length ? user.emails.find((e) => e.isPrimary)?.email || user.emails[0].email : null;
+    return { user: { id: user.id, email: primaryEmail, name: userDisplayName(user) }, token };
 }

@@ -1,11 +1,11 @@
 import prisma from '../prisma';
 
 export function findAllBikes() {
-  return prisma.bike.findMany({ include: { category: true, owner: { select: { id: true, email: true, name: true } } } });
+  return prisma.bike.findMany({ include: { category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } } });
 }
 
 export function findBikeById(id: number) {
-  return prisma.bike.findUnique({ where: { id }, include: { category: true, owner: { select: { id: true, email: true, name: true } } } });
+  return prisma.bike.findUnique({ where: { id }, include: { category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } } });
 }
 
 export function createBike(data: any) {

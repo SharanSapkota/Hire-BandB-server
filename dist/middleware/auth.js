@@ -15,7 +15,7 @@ async function authenticate(req, res, next) {
     const token = auth.split(' ')[1];
     try {
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
-        const user = await prisma_1.default.user.findUnique({ where: { id: decoded.userId }, include: { role: true, type: true } });
+        const user = await prisma_1.default.user.findUnique({ where: { id: decoded.userId }, include: { userRoles: { include: { role: true } }, UserType: true, emails: true } });
         if (!user)
             return res.status(401).json({ error: 'invalid token' });
         req.user = user;
@@ -28,7 +28,8 @@ async function authenticate(req, res, next) {
 }
 function authorizeRoles(...allowed) {
     return (req, res, next) => {
-        const roleName = req.user && req.user.role ? req.user.role.name : null;
+        const role = req.user && req.user.userRoles && req.user.userRoles.length ? req.user.userRoles[0].role : null;
+        const roleName = role ? (role.code || role.name) : null;
         if (!roleName || !allowed.includes(roleName))
             return res.status(403).json({ error: 'forbidden' });
         next();

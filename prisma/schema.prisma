@@ -22,25 +22,47 @@ model UserType {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique()
-  password  String
-  name      String?
-  userRoles UserRole[]
-  type      UserType? @relation(fields: [typeId], references: [id])
-  typeId    Int?
-  bikes     Bike[]
-  bookings  Booking[] @relation("renterBookings")
-  ownerBookings Booking[] @relation("ownerBookings")
-  notifications Notification[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                          Int                  @id @default(autoincrement())
+  firstName                   String?              @map("first_name")
+  secondName                  String?              @map("second_name")
+  lastName                    String?              @map("last_name")
+  password                    String
+  age                         Int?
+  isActive                    Boolean              @default(true) @map("is_active")
+  emails                      UserEmail[]
+  phones                      UserPhone[]
+  details                     UserDetail?
+  identities                  UserIdentity[]
+  userRoles                   UserRole[]
+  permissions                 UserPermission[]
+  bikes                       Bike[]
+  bookings                    Booking[]            @relation("renterBookings")
+  ownerBookings               Booking[]            @relation("ownerBookings")
+  notifications               Notification[]
+  reviewsGiven                Review[]             @relation("reviewer")
+  reviewsReceived             Review[]             @relation("reviewee")
+  locations                   Location[]
+  productAssigned             ProductAssigned[]    @relation("ownerAssigned")
+  assignedProducts            ProductAssigned[]    @relation("assignedToAssigned")
+  rentalOwner                 Rental[]             @relation("rentalOwner")
+  rentalRenter                Rental[]             @relation("rentalRenter")
+  paymentTransactionsPayer    PaymentTransaction[] @relation("payer")
+  paymentTransactionsReceiver PaymentTransaction[] @relation("receiver")
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+  UserType                    UserType?            @relation(fields: [userTypeId], references: [id])
+  userTypeId                  Int?
+  UserSecurity                UserSecurity?
+  UserPaymentMethod           UserPaymentMethod[]
+  Product                     Product[]
+  ActivityLog                 ActivityLog[]
 }
 
 model Category {
-  id    Int    @id @default(autoincrement())
-  name  String @unique()
-  bikes Bike[]
+  id      Int       @id @default(autoincrement())
+  name    String    @unique()
+  bikes   Bike[]
+  Product Product[]
 }
 
 model Bike {
@@ -68,76 +90,76 @@ enum BookingStatus {
 }
 
 model Booking {
-  id          Int           @id @default(autoincrement())
-  user        User          @relation("renterBookings", fields: [userId], references: [id])
-  userId      Int
-  bike        Bike          @relation("bikeBookings", fields: [bikeId], references: [id])
-  bikeId      Int
-  owner       User          @relation("ownerBookings", fields: [ownerId], references: [id])
-  ownerId     Int
-  status      BookingStatus @default(PENDING)
-  completedAt DateTime?
-  startTime   DateTime?
-  endTime     DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id            Int            @id @default(autoincrement())
+  user          User           @relation("renterBookings", fields: [userId], references: [id])
+  userId        Int
+  bike          Bike           @relation("bikeBookings", fields: [bikeId], references: [id])
+  bikeId        Int
+  owner         User           @relation("ownerBookings", fields: [ownerId], references: [id])
+  ownerId       Int
+  status        BookingStatus  @default(PENDING)
+  completedAt   DateTime?
+  startTime     DateTime?
+  endTime       DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   notifications Notification[]
 }
 
 model Notification {
-  id         Int      @id @default(autoincrement())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     Int
-  booking    Booking? @relation(fields: [bookingId], references: [id])
-  bookingId  Int?
-  title      String
-  message    String
-  read       Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+  bookingId Int?
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 // Extended models requested
 
 model Role {
-  id          BigInt   @id @default(autoincrement())
-  code        String   @unique
-  name        String?
-  description String?
-  userRoles   UserRole[]
+  id              BigInt           @id @default(autoincrement())
+  code            String           @unique
+  name            String?
+  description     String?
+  userRoles       UserRole[]
   rolePermissions RolePermission[]
 }
 
 model UserRole {
-  id       Int   @id @default(autoincrement())
-  user     User  @relation(fields: [userId], references: [id])
-  userId   Int
-  role     Role  @relation(fields: [roleId], references: [id])
-  roleId   BigInt
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId BigInt
 }
 
 model Permission {
-  id          Int    @id @default(autoincrement())
-  code        String @unique
-  name        String
-  description String?
-  isActive    Boolean @default(true)
+  id              Int              @id @default(autoincrement())
+  code            String           @unique
+  name            String
+  description     String?
+  isActive        Boolean          @default(true)
   userPermissions UserPermission[]
   rolePermissions RolePermission[]
 }
 
 model UserPermission {
-  id           Int  @id @default(autoincrement())
-  user         User @relation(fields: [userId], references: [id])
+  id           Int        @id @default(autoincrement())
+  user         User       @relation(fields: [userId], references: [id])
   userId       Int
   accessType   Boolean
   permission   Permission @relation(fields: [permissionId], references: [id])
   permissionId Int
-  isActive     Boolean @default(true)
+  isActive     Boolean    @default(true)
 }
 
 model RolePermission {
-  id           Int  @id @default(autoincrement())
-  role         Role @relation(fields: [roleId], references: [id])
+  id           Int        @id @default(autoincrement())
+  role         Role       @relation(fields: [roleId], references: [id])
   roleId       BigInt
   accessType   Boolean
   permission   Permission @relation(fields: [permissionId], references: [id])
@@ -145,113 +167,118 @@ model RolePermission {
 }
 
 model UserDetail {
-  id        Int    @id @default(autoincrement())
-  user      User   @relation(fields: [userId], references: [id])
-  userId    Int    @unique
-  address1  String?
-  address2  String?
-  city      String?
-  state     String?
-  country   BigInt?
-  isActive  Boolean @default(true)
+  id       Int     @id @default(autoincrement())
+  user     User    @relation(fields: [userId], references: [id])
+  userId   Int     @unique
+  address1 String?
+  address2 String?
+  city     String?
+  state    String?
+  country  BigInt?
+  isActive Boolean @default(true)
 }
 
 model UserEmail {
-  id        Int    @id @default(autoincrement())
-  email     String @unique
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
   isActive  Boolean @default(true)
   isPrimary Boolean @default(false)
-  user      User   @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
   userId    Int
 }
 
 model UserPhone {
-  id        BigInt @id @default(autoincrement())
+  id        BigInt  @id @default(autoincrement())
   number    String
   isActive  Boolean @default(true)
   isPrimary Boolean @default(false)
-  user      User   @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
   userId    Int
 }
 
 model UserSecurity {
-  id                  BigInt   @id @default(autoincrement())
+  id                  BigInt    @id @default(autoincrement())
   password            String
   lastPasswordChanged DateTime?
-  isExpired           Boolean @default(false)
-  loginAttempt        Int     @default(0)
-  user                User    @relation(fields: [userId], references: [id])
-  userId              Int  @unique
+  isExpired           Boolean   @default(false)
+  loginAttempt        Int       @default(0)
+  user                User      @relation(fields: [userId], references: [id])
+  userId              Int       @unique
 }
 
 model IdentificationService {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id             Int            @id @default(autoincrement())
+  name           String         @unique
   userIdentities UserIdentity[]
 }
 
 model UserIdentity {
-  id                         Int    @id @default(autoincrement())
-  name                       String
-  user                       User   @relation(fields: [userId], references: [id])
-  userId                     Int
-  identificationService      IdentificationService @relation(fields: [identificationServiceId], references: [id])
-  identificationServiceId    Int
-  isActive                   Boolean @default(true)
+  id                      Int                   @id @default(autoincrement())
+  name                    String
+  user                    User                  @relation(fields: [userId], references: [id])
+  userId                  Int
+  identificationService   IdentificationService @relation(fields: [identificationServiceId], references: [id])
+  identificationServiceId Int
+  isActive                Boolean               @default(true)
 }
 
 model PaymentMethod {
-  id      Int    @id @default(autoincrement())
-  name    String
-  isActive Boolean @default(true)
-  userMethods UserPaymentMethod[]
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  isActive           Boolean              @default(true)
+  userMethods        UserPaymentMethod[]
+  PaymentTransaction PaymentTransaction[]
 }
 
 model UserPaymentMethod {
-  id              Int @id @default(autoincrement())
-  user            User @relation(fields: [userId], references: [id])
+  id              Int           @id @default(autoincrement())
+  user            User          @relation(fields: [userId], references: [id])
   userId          Int
   paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
   paymentMethodId Int
 }
 
 model ProductPrice {
-  id            Int    @id @default(autoincrement())
-  price         String
-  currency      String
+  id              Int       @id @default(autoincrement())
+  price           String
+  currency        String
   discountPercent Int?
-  offerStatus   String?
+  offerStatus     String?
+  Product         Product[]
 }
 
 model Product {
-  id             Int    @id @default(autoincrement())
-  name           String
-  category       Category? @relation(fields: [categoryId], references: [id])
-  categoryId     Int?
-  isActive       Boolean @default(true)
-  boughtYear     String?
-  condition      String?
-  owner          User    @relation(fields: [ownerId], references: [id])
-  ownerId        Int
-  status         String?
-  latitude       Decimal? @db.Decimal(10, 8)
-  longitude      Decimal? @db.Decimal(11, 8)
-  hourlyRate     Decimal? @db.Decimal(10, 2)
-  dailyRate      Decimal? @db.Decimal(10, 2)
-  isAvailable    Boolean @default(true)
-  productPrice   ProductPrice? @relation(fields: [productPriceId], references: [id])
-  productPriceId Int?
-  reviews        Review[]
-  images         ProductImage[]
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  category           Category?            @relation(fields: [categoryId], references: [id])
+  categoryId         Int?
+  isActive           Boolean              @default(true)
+  boughtYear         String?
+  condition          String?
+  owner              User                 @relation(fields: [ownerId], references: [id])
+  ownerId            Int
+  status             String?
+  latitude           Decimal?             @db.Decimal(10, 8)
+  longitude          Decimal?             @db.Decimal(11, 8)
+  hourlyRate         Decimal?             @db.Decimal(10, 2)
+  dailyRate          Decimal?             @db.Decimal(10, 2)
+  isAvailable        Boolean              @default(true)
+  productPrice       ProductPrice?        @relation(fields: [productPriceId], references: [id])
+  productPriceId     Int?
+  reviews            Review[]
+  images             ProductImage[]
+  Rental             Rental[]
+  PaymentTransaction PaymentTransaction[]
+  ProductAssigned    ProductAssigned[]
 }
 
 model Review {
-  id         Int    @id @default(autoincrement())
-  reviewer   User   @relation("reviewer", fields: [reviewerId], references: [id])
+  id         Int      @id @default(autoincrement())
+  reviewer   User     @relation("reviewer", fields: [reviewerId], references: [id])
   reviewerId Int
-  reviewee   User   @relation("reviewee", fields: [revieweeId], references: [id])
+  reviewee   User     @relation("reviewee", fields: [revieweeId], references: [id])
   revieweeId Int
-  product    Product @relation(fields: [productId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
   productId  Int
   rating     Int
   comment    String?
@@ -259,8 +286,8 @@ model Review {
 }
 
 model Location {
-  id           Int    @id @default(autoincrement())
-  user         User   @relation(fields: [userId], references: [id])
+  id           Int     @id @default(autoincrement())
+  user         User    @relation(fields: [userId], references: [id])
   userId       Int
   latitude     Decimal @db.Decimal(10, 8)
   longitude    Decimal @db.Decimal(11, 8)
@@ -271,8 +298,8 @@ model Location {
 }
 
 model ActivityLog {
-  id        Int    @id @default(autoincrement())
-  user      User   @relation(fields: [userId], references: [id])
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
   userId    Int
   action    String
   entity    String
@@ -281,60 +308,60 @@ model ActivityLog {
 }
 
 model Rental {
-  id                    Int    @id @default(autoincrement())
-  owner                 User   @relation("rentalOwner", fields: [ownerId], references: [id])
-  ownerId               Int
-  renter                User   @relation("rentalRenter", fields: [renterId], references: [id])
-  renterId              Int
-  product               Product @relation(fields: [productId], references: [id])
-  productId             Int
-  startTime             DateTime?
-  endTime               DateTime?
-  totalPrice            Decimal? @db.Decimal(10,2)
-  status                String?
-  paymentTransaction    PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id])
-  paymentTransactionId  Int?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   Int                 @id @default(autoincrement())
+  owner                User                @relation("rentalOwner", fields: [ownerId], references: [id])
+  ownerId              Int
+  renter               User                @relation("rentalRenter", fields: [renterId], references: [id])
+  renterId             Int
+  product              Product             @relation(fields: [productId], references: [id])
+  productId            Int
+  startTime            DateTime?
+  endTime              DateTime?
+  totalPrice           Decimal?            @db.Decimal(10, 2)
+  status               String?
+  paymentTransaction   PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id])
+  paymentTransactionId Int?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
 }
 
 model ProductImage {
-  id         Int    @id @default(autoincrement())
-  product    Product @relation(fields: [productId], references: [id])
+  id         Int      @id @default(autoincrement())
+  product    Product  @relation(fields: [productId], references: [id])
   productId  Int
   imageUrl   String
-  isPrimary  Boolean @default(false)
+  isPrimary  Boolean  @default(false)
   uploadedAt DateTime @default(now())
 }
 
 model PaymentTransaction {
-  id                    Int    @id @default(autoincrement())
-  payer                 User   @relation("payer", fields: [payerId], references: [id])
-  payerId               Int
-  receiver              User   @relation("receiver", fields: [receiverId], references: [id])
-  receiverId            Int
-  product               Product @relation(fields: [productId], references: [id])
-  productId             Int
-  amount                Decimal @db.Decimal(10,2)
-  currency              String
-  paymentMethod         PaymentMethod @relation(fields: [paymentMethodId], references: [id])
-  paymentMethodId       Int
-  transactionReference  String?
-  paymentStatus         String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   Int           @id @default(autoincrement())
+  payer                User          @relation("payer", fields: [payerId], references: [id])
+  payerId              Int
+  receiver             User          @relation("receiver", fields: [receiverId], references: [id])
+  receiverId           Int
+  product              Product       @relation(fields: [productId], references: [id])
+  productId            Int
+  amount               Decimal       @db.Decimal(10, 2)
+  currency             String
+  paymentMethod        PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId      Int
+  transactionReference String?
+  paymentStatus        String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  Rental               Rental[]
 }
 
 model ProductAssigned {
-  id             Int    @id @default(autoincrement())
-  owner          User   @relation(fields: [ownerId], references: [id])
-  ownerId        Int
-  assignedTo     User   @relation(fields: [assignedToId], references: [id])
-  assignedToId   Int
-  product        Product @relation(fields: [productId], references: [id])
-  productId      Int
-  paymentStatus  String?
-  status         String?
-  paymentMethod  Int?
+  id            Int     @id @default(autoincrement())
+  owner         User    @relation("ownerAssigned", fields: [ownerId], references: [id])
+  ownerId       Int
+  assignedTo    User    @relation("assignedToAssigned", fields: [assignedToId], references: [id])
+  assignedToId  Int
+  product       Product @relation(fields: [productId], references: [id])
+  productId     Int
+  paymentStatus String?
+  status        String?
+  paymentMethod Int?
 }
-

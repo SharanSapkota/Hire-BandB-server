@@ -66,8 +66,11 @@ async function createBooking(payload, currentUser) {
         endTime: endTime ? new Date(endTime) : null,
     };
     const created = await bookingRepo.createBooking(data);
+    // compute primary email/name for currentUser
+    const renterEmail = currentUser.emails && currentUser.emails.length ? currentUser.emails.find((e) => e.isPrimary)?.email || currentUser.emails[0].email : null;
+    const renterName = [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' ') || renterEmail;
     // notify owner
-    await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, title: 'New booking', message: `Bike ${bike.name} was booked by ${currentUser.email}` });
+    await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, title: 'New booking', message: `Bike ${bike.name} was booked by ${renterName}` });
     // notify renter
     await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, title: 'Booking created', message: `Your booking for bike ${bike.name} is pending` });
     return created;
@@ -77,7 +80,8 @@ async function updateBooking(id, payload, currentUser) {
     if (!booking)
         throw new Error('not_found');
     // only renter or owner or admin can update
-    const isOwner = currentUser.id === booking.ownerId || (currentUser.role && currentUser.role.name === 'ADMIN');
+    const role = currentUser.userRoles && currentUser.userRoles.length ? currentUser.userRoles[0].role : null;
+    const isOwner = currentUser.id === booking.ownerId || (role && (role.code === 'ADMIN' || role.name === 'ADMIN'));
     const isRenter = currentUser.id === booking.userId;
     if (!isOwner && !isRenter)
         throw new Error('forbidden');
@@ -100,7 +104,8 @@ async function deleteBooking(id, currentUser) {
     const booking = await bookingRepo.findBookingById(id);
     if (!booking)
         throw new Error('not_found');
-    if (currentUser.id !== booking.userId && currentUser.id !== booking.ownerId && !(currentUser.role && currentUser.role.name === 'ADMIN'))
+    const role2 = currentUser.userRoles && currentUser.userRoles.length ? currentUser.userRoles[0].role : null;
+    if (currentUser.id !== booking.userId && currentUser.id !== booking.ownerId && !(role2 && (role2.code === 'ADMIN' || role2.name === 'ADMIN')))
         throw new Error('forbidden');
     return bookingRepo.deleteBooking(id);
 }

@@ -71,7 +71,8 @@ async function updateBike(id, payload, currentUser) {
     const bike = await bikeRepo.findBikeById(id);
     if (!bike)
         throw new Error('not_found');
-    if (currentUser.id !== bike.ownerId && currentUser.role && currentUser.role.name !== 'ADMIN')
+    const currentRole = currentUser.userRoles && currentUser.userRoles.length ? currentUser.userRoles[0].role : null;
+    if (currentUser.id !== bike.ownerId && currentRole && (currentRole.code !== 'ADMIN' && currentRole.name !== 'ADMIN'))
         throw new Error('forbidden');
     const { name, description, rentAmount, status, startTime, endTime, categoryName } = payload;
     let category = null;
@@ -93,7 +94,8 @@ async function deleteBike(id, currentUser) {
     const bike = await bikeRepo.findBikeById(id);
     if (!bike)
         throw new Error('not_found');
-    if (currentUser.id !== bike.ownerId && currentUser.role && currentUser.role.name !== 'ADMIN')
+    const currentRole2 = currentUser.userRoles && currentUser.userRoles.length ? currentUser.userRoles[0].role : null;
+    if (currentUser.id !== bike.ownerId && currentRole2 && (currentRole2.code !== 'ADMIN' && currentRole2.name !== 'ADMIN'))
         throw new Error('forbidden');
     return bikeRepo.deleteBike(id);
 }
