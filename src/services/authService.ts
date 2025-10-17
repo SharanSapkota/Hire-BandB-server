@@ -20,7 +20,7 @@ export async function signup(payload: { firstName?: string; lastName?: string; e
 
   const user = await userRepo.createUser({ email: payload.email, password: hashed, firstName: payload.firstName, lastName: payload.lastName, roleId: defaultRole ? defaultRole.id : undefined, typeId: defaultType ? defaultType.id : undefined });
 
-  const roleCode = defaultRole ? defaultRole.code : 'USER';
+  const roleCode = defaultRole ? defaultRole.code : 'OWNER';
   const token = jwt.sign({ userId: user.id, role: roleCode }, JWT_SECRET, { expiresIn: '7d' });
   return { user: { id: user.id, email: payload.email, name: userDisplayName(user) }, token };
 }
