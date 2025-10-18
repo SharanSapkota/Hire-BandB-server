@@ -23,6 +23,8 @@ import locationRoutes from './routes/locations';
 import activityLogRoutes from './routes/activityLogs';
 import permissionMappingRoutes from './routes/permissionMappings';
 import userEmailRoutes from './routes/userEmails';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swagger';
 
 const app = express();
 app.use(cors());
@@ -50,6 +52,9 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/permission-mappings', permissionMappingRoutes);
 app.use('/api/user-emails', userEmailRoutes);
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req: Request, res: Response) => res.json({ ok: true }));
 

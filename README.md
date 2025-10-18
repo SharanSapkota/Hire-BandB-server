@@ -42,3 +42,11 @@ API Endpoints
 
 Notes
 - You need a running PostgreSQL instance and a DATABASE_URL set in .env.
+
+API documentation (Swagger)
+
+After installing dependencies and starting the server (defaults to port 4000), open:
+
+http://localhost:4000/api-docs
+
+The docs are generated from JSDoc comments in `src/routes/**/*.ts`.
