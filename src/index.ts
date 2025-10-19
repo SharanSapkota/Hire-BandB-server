@@ -10,6 +10,7 @@ import roleRoutes from './routes/roles';
 import permRoutes from './routes/permissions';
 import productRoutes from './routes/products';
 import paymentRoutes from './routes/payments';
+import fileUploadRoute from './routes/fileUpload';
 import rentalRoutes from './routes/rentals';
 import productAssetRoutes from './routes/productAssets';
 import userPaymentRoutes from './routes/userPayments';
@@ -52,6 +53,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/permission-mappings', permissionMappingRoutes);
 app.use('/api/user-emails', userEmailRoutes);
+app.use('/api/file-upload', fileUploadRoute);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

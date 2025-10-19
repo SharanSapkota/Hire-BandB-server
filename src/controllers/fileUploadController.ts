@@ -1,12 +1,21 @@
 import { Request, Response } from 'express';
-import * as catRepo from '../repositories/categoryRepository';
+import { FileUploadService } from '../services/FileUpload/fileUploadService';
+import { sendSuccess } from '../utils/response';
 
-export async function list(req: Request, res: Response) {
-  const items = await catRepo.findAllCategories();
-  res.json(items);
-}
+const fileUploadService = new FileUploadService();
 
-export async function create(req: Request, res: Response) {
-  const item = await catRepo.createCategory(req.body);
-  res.status(201).json(item);
-}
+export const getPreSignedUploadUrl = async (req: Request, res: Response) => {
+  try {
+    const { fileName, fileType } = req.query;
+    const uploadUrlData = await fileUploadService.getUploadUrl(
+      fileName as string,
+      fileType as string
+    );
+
+    sendSuccess(res, uploadUrlData, 200);
+  } catch (error) {
+    console.error('Error generating pre-signed URL:', error);
+    res.status(500).json({ error: 'Failed to generate pre-signed URL' });
+  }
+
+};
