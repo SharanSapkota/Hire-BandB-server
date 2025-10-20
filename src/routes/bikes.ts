@@ -45,7 +45,7 @@ router.get('/:id', bikeController.get);
  *             schema:
  *               $ref: '#/components/schemas/Bike'
  */
-router.post('/', authenticate, bikeController.create);
+router.post('/', bikeController.create);
 router.put('/:id', authenticate, bikeController.update);
 router.delete('/:id', authenticate, bikeController.remove);
 

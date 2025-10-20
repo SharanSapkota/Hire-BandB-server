@@ -16,7 +16,7 @@ export class BikeRepository {
   }
 
   createBikeImages(data: any, transaction: any) {
-    return transaction.bikeImages.create({ data });
+    return transaction.bikeImages.createMany({ data });
   }
 
   createBikeAddress(data: any, transaction: any) {

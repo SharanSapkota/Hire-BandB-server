@@ -26,7 +26,7 @@ export async function get(req: Request, res: Response) {
 
 export async function create(req: Request, res: Response) {
   try {
-    const bike = await bikeService.createBike(req.body, req.user.id);
+    const bike = await bikeService.createBike(req.body);
     res.status(201).json(bike);
   } catch (err) {
     console.error(err);

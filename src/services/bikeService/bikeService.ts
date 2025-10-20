@@ -15,7 +15,7 @@ export class BikeService {
     return this.repo.findBikeById(id);
   }
 
-  async createBike(payload: any, ownerId: number) {
+  async createBike(payload: any) {
         const result = await prisma.$transaction(async (transaction: any) => {
             const bikeMapper = bikeCreateDto(payload);
             const createdBike = await this.repo.createBike(bikeMapper, transaction);
@@ -23,7 +23,7 @@ export class BikeService {
             const createdAddress = await this.repo.createBikeAddress(addressMapper, transaction);
             const imagesMapper = bikeImagesCreateDto(payload, createdBike.id);
             const createdImages = await this.repo.createBikeImages(imagesMapper, transaction);
-        
+
             return {...createdBike, images: createdImages, address: createdAddress };
         });
 
