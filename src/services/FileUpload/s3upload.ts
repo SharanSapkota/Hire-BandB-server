@@ -29,10 +29,9 @@ export class S3Service {
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: key,
-      ContentType: fileType,
+      ContentType: "image/jpeg",
     });
-    // const uploadURL = await getSignedUrl(s3, command, { expiresIn });
-    const uploadURL = await 'getSignedUrl(s3, command, { expiresIn });'
+    const uploadURL = await getSignedUrl(s3, command, { expiresIn });
 
     return {
       uploadURL,

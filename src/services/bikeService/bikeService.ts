@@ -1,5 +1,6 @@
-import {BikeRepository} from '../repositories/bikeRepository';
-import prisma from '../prisma';
+import {BikeRepository} from '../../repositories/bikeRepository';
+import prisma from '../../prisma';
+import { bikeAddressCreateDto, bikeCreateDto, bikeImagesCreateDto } from './mapper';
 
 export class BikeService {
   constructor(private repo: BikeRepository) {
@@ -15,22 +16,18 @@ export class BikeService {
   }
 
   async createBike(payload: any, ownerId: number) {
-    const { name, description, rentAmount, status, startTime, endTime, categoryName } = payload;
-    let category = null;
-    if (categoryName) {
-      category = await prisma.category.upsert({ where: { name: categoryName }, update: {}, create: { name: categoryName } });
-    }
-    const data = {
-      name,
-      description,
-      rentAmount: rentAmount != null ? Number(rentAmount) : 0,
-      status,
-      startTime: startTime ? new Date(startTime) : null,
-      endTime: endTime ? new Date(endTime) : null,
-      ownerId,
-      categoryId: category ? category.id : undefined
-    };
-    return this.repo.createBike(data);
+        const result = await prisma.$transaction(async (transaction: any) => {
+            const bikeMapper = bikeCreateDto(payload);
+            const createdBike = await this.repo.createBike(bikeMapper, transaction);
+            const addressMapper = bikeAddressCreateDto(payload, createdBike.id);
+            const createdAddress = await this.repo.createBikeAddress(addressMapper, transaction);
+            const imagesMapper = bikeImagesCreateDto(payload, createdBike.id);
+            const createdImages = await this.repo.createBikeImages(imagesMapper, transaction);
+        
+            return {...createdBike, images: createdImages, address: createdAddress };
+        });
+
+    return result
   }
 
   async updateBike(id: number, payload: any, currentUser: any) {

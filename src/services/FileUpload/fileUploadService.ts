@@ -16,7 +16,7 @@ export class FileUploadService implements BaseFileUploadService {
         // key: string;
         // publicUrl: string;
       }> {
-        const uploadUrl = this.s3Service.generateUploadUrl(fileName, fileType);
+        const uploadUrl = await this.s3Service.generateUploadUrl(fileName, fileType);
 
         return uploadUrl;
     }

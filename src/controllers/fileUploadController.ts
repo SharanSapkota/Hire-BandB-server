@@ -6,6 +6,7 @@ const fileUploadService = new FileUploadService();
 
 export const getPreSignedUploadUrl = async (req: Request, res: Response) => {
   try {
+    console.log('Received request for pre-signed URL with query:', req.query);
     const { fileName, fileType } = req.query;
     const uploadUrlData = await fileUploadService.getUploadUrl(
       fileName as string,

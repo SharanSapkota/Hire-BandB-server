@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { BikeService } from '../services/bikeService';
+import { BikeService } from '../services/bikeService/bikeService';
 import { BikeRepository } from '../repositories/bikeRepository';
 import { sendSuccess, sendFailure } from '../utils/response';
 
