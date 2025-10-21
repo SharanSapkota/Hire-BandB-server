@@ -1,7 +1,7 @@
 const ROLES = {
   ADMIN: 'ADMIN',
   OWNER: 'OWNER',
-  TENANT: 'TENANT',
+  RENTER: 'RENTER',
   GUEST: 'GUEST',
 };
 

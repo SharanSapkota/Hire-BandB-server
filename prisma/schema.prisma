@@ -71,7 +71,6 @@ model Bike {
   description String?
   rentAmount  Float
   bikeImages  BikeImages[]
-  bikeId      Int 
   bikeAddress BikeAddress[]
   status      BikeStatus @default(AVAILABLE)
   startTime   DateTime?
@@ -89,7 +88,7 @@ model BikeImages {
   id          Int        @id  @default(autoincrement())
   bike        Bike       @relation(fields: [bikeId], references:[id])
   bikeId      Int
-  images      String
+  imageUrl      String
 }
 
 model BikeAddress {
@@ -196,10 +195,15 @@ model UserDetail {
   user     User    @relation(fields: [userId], references: [id])
   userId   Int     @unique
   address1 String?
-  address2 String?
-  city     String?
-  state    String?
-  country  BigInt?
+  street   String?
+  latitude    Float?
+  longitude   Float?
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  placeId     String?
   isActive Boolean @default(true)
 }
 

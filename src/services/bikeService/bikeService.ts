@@ -16,6 +16,7 @@ export class BikeService {
   }
 
   async createBike(payload: any) {
+    try{
         const result = await prisma.$transaction(async (transaction: any) => {
             const bikeMapper = bikeCreateDto(payload);
             const createdBike = await this.repo.createBike(bikeMapper, transaction);
@@ -25,9 +26,14 @@ export class BikeService {
             const createdImages = await this.repo.createBikeImages(imagesMapper, transaction);
 
             return {...createdBike, images: createdImages, address: createdAddress };
-        });
+        },
+        {timeout: 20000}
+      );
 
     return result
+      } catch (error) {
+        throw error;
+      }
   }
 
   async updateBike(id: number, payload: any, currentUser: any) {

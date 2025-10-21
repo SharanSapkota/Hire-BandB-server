@@ -11,18 +11,21 @@ export const bikeCreateDto = (bike: any) => {
     };
 }
 
-export const bikeImagesCreateDto = (bikeImages: any, bikeId: any) => {
-    return bikeImages.map((image: any) => ({
+export const bikeImagesCreateDto = (payload: any, bikeId: any) => {
+    const bikeImages = payload.bikeImages.map((image: any) => ({
         bikeId: bikeId,
         imageUrl: image.imageUrl
     }));
+
+    return bikeImages;
 }
 
 export const bikeAddressCreateDto = (bikeAddress: any, bikeId: any) => {
     return {
         bikeId: bikeId,
-        addressLine1: bikeAddress.addressLine1,
-        addressLine2: bikeAddress.addressLine2,
+        address: bikeAddress.address,
+        latitude: bikeAddress.latitude,
+        longitude: bikeAddress.longitude,
         city: bikeAddress.city,
         street: bikeAddress.street,
         village: bikeAddress.village,
