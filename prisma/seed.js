@@ -7,7 +7,9 @@ async function main() {
   // Create roles
   const roles = [
     { code: 'ADMIN', name: 'Administrator', description: 'Full system access' },
-    { code: 'USER', name: 'User', description: 'Standard user access' }
+    { code: 'OWNER', name: 'OWNER', description: 'Owner access' },
+    { code: 'RENTER', name: 'RENTER', description: 'Renter access' },
+    { code: 'GUEST', name: 'GUEST', description: 'Guest access' },
   ];
   
   for (const role of roles) {
