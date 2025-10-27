@@ -209,7 +209,7 @@ model UserDetail {
 
 model UserEmail {
   id        Int     @id @default(autoincrement())
-  email     String  @unique
+  email     String
   isActive  Boolean @default(true)
   isPrimary Boolean @default(false)
   user      User    @relation(fields: [userId], references: [id])
@@ -218,7 +218,7 @@ model UserEmail {
 
 model UserPhone {
   id        BigInt  @id @default(autoincrement())
-  number    String
+  phone    String
   isActive  Boolean @default(true)
   isPrimary Boolean @default(false)
   user      User    @relation(fields: [userId], references: [id])
