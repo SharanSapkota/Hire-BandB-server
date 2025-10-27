@@ -9,55 +9,38 @@ function userDisplayName(u: any) {
   return [u.firstName, u.lastName].filter(Boolean).join(' ') || null;
 }
 
-export async function signup(payload: { firstName?: string; lastName?: string; email: string; password: string }) {
+export async function signup(payload: any) {
   try {
-    // Check if user already exists
     const existing = await userRepo.findUserByEmail(payload.email);
     if (existing) {
       throw new Error('email_in_use');
     }
 
-    // Hash password
     const hashed = await bcrypt.hash(payload.password, 12);
 
-    // Get default role and type
-    const defaultRole = await prisma.role.findFirst({ where: { code: 'USER' } });
-    const defaultType = await prisma.userType.findFirst({ where: { name: 'CUSTOMER' } });
-
-    if (!defaultRole) {
-      throw new Error('default_role_not_found');
-    }
-
-    // Create user
     const user = await userRepo.createUser({ 
       email: payload.email, 
-      password: hashed, 
-      firstName: payload.firstName, 
-      lastName: payload.lastName, 
-      roleId: defaultRole.id, 
-      typeId: defaultType?.id 
+      password: hashed,
+      firstName: payload?.firstName, 
+      lastName: payload?.lastName, 
+      phone: payload?.phone,
+      role: payload?.role, 
+      address1: payload?.address1,
+      address2: payload?.address2,
+      city: payload?.city,
+      state: payload?.state,
+      country: payload?.country,
+      postalCode: payload?.postalCode,
+      placeId: payload?.placeId,
     });
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: user.id, 
-        role: defaultRole.code,
-        email: payload.email 
-      }, 
-      JWT_SECRET, 
-      { expiresIn: '7d' }
-    );
-
     return { 
-      success: true,
       user: { 
         id: user.id, 
         email: payload.email, 
         name: userDisplayName(user),
-        role: defaultRole.code
+        role: user?.role,
       }, 
-      token 
     };
   } catch (error: any) {
     console.error('Signup error:', error);
@@ -100,7 +83,6 @@ export async function login(payload: { email: string; password: string }) {
       : payload.email;
 
     return { 
-      success: true,
       user: { 
         id: user.id, 
         email: primaryEmail, 

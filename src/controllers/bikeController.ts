@@ -7,7 +7,7 @@ const bikeRepository = new BikeRepository();
 const bikeService = new BikeService(bikeRepository);
 
 export async function list(req: Request, res: Response) {
-  const bikes = await bikeService.listBikes();
+  const bikes = await bikeService.listBikes(req.query);
   res.json(bikes);
 }
 

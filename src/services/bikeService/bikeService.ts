@@ -1,14 +1,18 @@
 import {BikeRepository} from '../../repositories/bikeRepository';
 import prisma from '../../prisma';
 import { bikeAddressCreateDto, bikeCreateDto, bikeImagesCreateDto } from './mapper';
+import { BikeQueryBuilder } from '../../queryBuilder/bikeQuery';
+import { QueryBuilder } from '../../queryBuilder/query';
 
 export class BikeService {
   constructor(private repo: BikeRepository) {
     this.repo = repo;
   }
 
-  async listBikes() {
-    return this.repo.findAllBikes();
+  async listBikes(query: any) {
+    const queryBuilder = new BikeQueryBuilder(query)
+    const listBikeQuery = queryBuilder.listBike({bikeAdress: true, bikeImages: true, bikeCategory: true})
+    return this.repo.findAllBikes(listBikeQuery);
   }
 
   async getBike(id: number) {

@@ -3,12 +3,14 @@ import prisma from '../prisma';
 export class BikeRepository {
   constructor(private db = prisma) {}
 
-  async findAllBikes() {
-    return this.db.bike.findMany({ include: { category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } } });
+  async findAllBikes(query: any) {
+    // return this.db.bike.findMany({ include: {bikeImages: true, bikeAddress: true, category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } } });
+    return this.db.bike.findMany(query);
+
   }
 
   async findBikeById(id: number) {
-    return this.db.bike.findUnique({ where: { id }, include: { category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } } });
+    return this.db.bike.findUnique({ where: { id }, include: {bikeImages: true, bikeAddress: true, category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } } });
   }
 
   async createBike(data: any, transaction: any) {

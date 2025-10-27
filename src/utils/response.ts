@@ -5,7 +5,7 @@ interface ApiResponse {
     statusCode: number;
 }
 export function sendSuccess(res: Response, data: any = {data: []}, statusCode: number = 200) {
-  return res.status(statusCode).json({ success: true, data: { data }, statusCode });
+  return res.status(statusCode).json({ success: true, data, statusCode });
 }
 
 export function sendFailure(res: Response, data: any = [], statusCode: number = 500) {
