@@ -2,22 +2,80 @@ import prisma from '../prisma';
 
 export async function findUserByEmail(email: string) {
   // email is stored in UserEmail
-  return prisma.user.findFirst({ where: { emails: { some: { email } } }, include: { userRoles: { include: { role: true } }, UserType: true, emails: true } });
+  const userList = await prisma.user.findFirst({ where: { emails: { some: { email } } }, include: { userRoles: { include: { role: true } }, UserType: true, emails: true } });
+  return userList;
 }
 
-export async function createUser(data: { firstName?: string; lastName?: string; password: string; typeId?: number; email?: string; roleId?: bigint | number }) {
-  const { email, roleId, ...rest } = data as any;
-  const user = await prisma.user.create({ data: { ...rest, emails: email ? { create: { email, isPrimary: true } } : undefined } });
-  if (roleId) {
-    // create mapping in UserRole
-    try {
-      await prisma.userRole.create({ data: { userId: user.id, roleId: BigInt(roleId as any) } });
-    } catch (e) {
-      // swallow mapping error to not break user creation if role mapping fails
-      console.warn('Failed to create user role mapping', e);
-    }
-  }
+export async function createUser(data: any) {
+  try {
+  const { email, role, ...rest } = data as any;
+  const result = await prisma.$transaction(async (transaction: any) => {
+
+  const user = await transaction.user.create({ 
+    data: {
+      firstName: data?.firstName,
+      lastName: data?.lastName,
+      password: data?.password,
+      age: data?.age,
+      isActive: true,
+      emails: {
+        create: {
+          email: data?.email,
+          isPrimary: true
+        }
+      },
+      phones: {
+        create: {
+          phone: data?.phone,
+          isPrimary: true
+        }
+      },
+      details: {
+        create: {
+          address1: data?.address1,
+          address2: data?.address2,
+          city: data?.city,
+          state: data?.state,
+          country: data?.country,
+          postalCode: data?.postalCode,
+          placeId: data?.placeId
+        }
+      },
+      userRoles: {
+        create: {
+          roleId: role == 'OWNER' ? 1 : 2,
+          // userId: user?.id
+        }
+      }
+    } 
+  });
+ 
+
   return user;
+},{
+  timeout: 10000,
+});
+  return result;
+  } catch (error) {
+    console.error('Create user error:', error);
+    throw error;
+  }
+}
+
+export async function createUserDetail(userId: number, data: any, transaction: any) {
+  return transaction.userDetail.create({ data: { ...data, userId } });
+}
+
+export async function createUserEmail(userId: number, data: { email: string; isPrimary: boolean }, transaction: any) {
+  return transaction.userEmail.create({ data: { ...data, userId } });
+}
+
+export async function createUserPhone(userId: number, data: { phone: string; isPrimary: boolean }, transaction: any) {
+  return transaction.userPhone.create({ data: { ...data, userId } });
+}
+
+export async function createUserSecurity(userId: number, data: { password: string }, transaction: any) {
+  return transaction.userSecurity.create({ data: { ...data, userId } });
 }
 
 export async function findUserById(id: number) {

@@ -70,6 +70,8 @@ model Bike {
   name        String
   description String?
   rentAmount  Float
+  bikeImages  BikeImages[]
+  bikeAddress BikeAddress[]
   status      BikeStatus @default(AVAILABLE)
   startTime   DateTime?
   endTime     DateTime?
@@ -80,6 +82,28 @@ model Bike {
   bookings    Booking[]  @relation("bikeBookings")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model BikeImages {
+  id          Int        @id  @default(autoincrement())
+  bike        Bike       @relation(fields: [bikeId], references:[id])
+  bikeId      Int
+  imageUrl      String
+}
+
+model BikeAddress {
+  id          Int         @id  @default(autoincrement())
+  bike        Bike        @relation(fields: [bikeId], references:[id])
+  bikeId      Int
+  latitude    Float 
+  longitude   Float
+  address     String
+  street      String
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  placeId     String?
 }
 
 enum BookingStatus {
@@ -171,16 +195,21 @@ model UserDetail {
   user     User    @relation(fields: [userId], references: [id])
   userId   Int     @unique
   address1 String?
-  address2 String?
-  city     String?
-  state    String?
-  country  BigInt?
+  street   String?
+  latitude    Float?
+  longitude   Float?
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  placeId     String?
   isActive Boolean @default(true)
 }
 
 model UserEmail {
   id        Int     @id @default(autoincrement())
-  email     String  @unique
+  email     String
   isActive  Boolean @default(true)
   isPrimary Boolean @default(false)
   user      User    @relation(fields: [userId], references: [id])
@@ -189,7 +218,7 @@ model UserEmail {
 
 model UserPhone {
   id        BigInt  @id @default(autoincrement())
-  number    String
+  phone    String
   isActive  Boolean @default(true)
   isPrimary Boolean @default(false)
   user      User    @relation(fields: [userId], references: [id])
@@ -204,6 +233,9 @@ model UserSecurity {
   loginAttempt        Int       @default(0)
   user                User      @relation(fields: [userId], references: [id])
   userId              Int       @unique
+  passwordValidUntil  DateTime?
+  isValid             Boolean   @default(true)
+  passwordHistory     Json?
 }
 
 model IdentificationService {
