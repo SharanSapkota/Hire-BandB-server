@@ -8,7 +8,7 @@ export interface ValidationError {
 
 export function validateSignup(req: Request, res: Response, next: NextFunction) {
   const errors: ValidationError[] = [];
-  const { email, password, firstName, lastName } = req.body;
+  const { email, password, firstName, lastName, phone } = req.body;
 
   // Email validation
   if (!email) {
@@ -24,6 +24,15 @@ export function validateSignup(req: Request, res: Response, next: NextFunction) 
     errors.push({ field: 'password', message: 'Password must be at least 6 characters long' });
   } else if (password.length > 128) {
     errors.push({ field: 'password', message: 'Password must be less than 128 characters' });
+  }
+
+  // Optional phone number validation
+  if (phone) {
+    if (!validator.isMobilePhone(phone, 'any', { strictMode: false })) {
+      errors.push({ field: 'phone', message: 'Invalid phone number format' });
+    } else if (phone.length < 7 || phone.length > 15) {
+      errors.push({ field: 'phone', message: 'Phone number must be between 7 and 15 characters' });
+    }
   }
 
   // Optional name validation
