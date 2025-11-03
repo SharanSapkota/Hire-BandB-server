@@ -9,6 +9,13 @@ export class BikeService {
     this.repo = repo;
   }
 
+  listBikeByAddress(query: any) {
+    const queryBuilder = new BikeQueryBuilder(query)
+    const listBikeByAddressQuery = queryBuilder.listBikeByAddress();
+    
+    return this.repo.findAllBikes(listBikeByAddressQuery);
+  }
+
   async listBikes(query: any) {
     const queryBuilder = new BikeQueryBuilder(query)
     const listBikeQuery = queryBuilder.listBike({bikeAdress: true, bikeImages: true, bikeCategory: true})
