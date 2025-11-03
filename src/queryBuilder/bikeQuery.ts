@@ -7,6 +7,28 @@ export class BikeQueryBuilder {
         this.query = query
     }
 
+    listBikeByAddress() {
+        const bikeAddressQuery: any = {}
+        if(this.query?.lat && this.query?.lng) {
+            bikeAddressQuery.lat = this.query.lat;
+            bikeAddressQuery.lng = this.query.lng;
+        }
+
+        if(this.query?.city) {
+            bikeAddressQuery.city = this.query.city;
+        }
+
+        if(this.query?.state) {
+            bikeAddressQuery.state = this.query.state;
+        }
+
+        if(this.query?.country) {
+            bikeAddressQuery.country = this.query.country;
+        }
+
+        return { where: { bikeAddress: bikeAddressQuery } };
+    }
+
     listBike(includes: any) {
         let defaultQuery: any = { bikeImages: true, bikeAddress: true, category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } }
         const bikeIncludes: any = {}
