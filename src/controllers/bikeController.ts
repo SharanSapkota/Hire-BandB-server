@@ -11,6 +11,22 @@ export async function list(req: Request, res: Response) {
   res.json(bikes);
 }
 
+export async function listByAddress(req: Request, res: Response) {
+  try{
+    const lat = Number(req.query.lat);
+    const lng = Number(req.query.lng);
+    const city = req.query?.city as string;
+    const state = req.query?.state as string;
+    const country = req.query?.country as string;
+    const query = { lat, lng, city, state, country };
+    const bikes = await bikeService.listBikesByAddress(query);
+
+    return sendSuccess(res, bikes, 200);
+} catch (err: any) {
+  return sendFailure(res, { error: err.toString()}, 500);
+}
+}
+
 export async function get(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
