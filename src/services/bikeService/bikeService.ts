@@ -2,18 +2,17 @@ import {BikeRepository} from '../../repositories/bikeRepository';
 import prisma from '../../prisma';
 import { bikeAddressCreateDto, bikeCreateDto, bikeImagesCreateDto } from './mapper';
 import { BikeQueryBuilder } from '../../queryBuilder/bikeQuery';
-import { QueryBuilder } from '../../queryBuilder/query';
 
 export class BikeService {
   constructor(private repo: BikeRepository) {
     this.repo = repo;
   }
 
-  listBikeByAddress(query: any) {
+  async listBikesByAddress(query: { lat: number, lng: number, city?: string, state?: string, country?: string }) {
     const queryBuilder = new BikeQueryBuilder(query)
     const listBikeByAddressQuery = queryBuilder.listBikeByAddress();
     
-    return this.repo.findAllBikes(listBikeByAddressQuery);
+    return await this.repo.findAllBikes(listBikeByAddressQuery);
   }
 
   async listBikes(query: any) {
