@@ -1,4 +1,5 @@
 import * as notifRepo from '../repositories/notificationRepository';
+import { emitToUser } from '../lib/socket';
 
 export async function listNotifications(userId: number) {
   return notifRepo.findNotificationsForUser(userId);
@@ -9,7 +10,11 @@ export async function getNotification(id: number) {
 }
 
 export async function createNotification(payload: any) {
-  return notifRepo.createNotification(payload);
+  const notification = await notifRepo.createNotification(payload);
+  if (payload?.userId) {
+    emitToUser(payload.userId, 'notification:new', notification);
+  }
+  return notification;
 }
 
 export async function markNotificationRead(id: number) {
