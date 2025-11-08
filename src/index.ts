@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import { createServer } from 'http';
 import authRoutes from './routes/auth';
 import bikeRoutes from './routes/bikes';
 import userRoutes from './routes/users';
@@ -26,6 +27,7 @@ import permissionMappingRoutes from './routes/permissionMappings';
 import userEmailRoutes from './routes/userEmails';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
+import { initSocket } from './lib/socket';
 
 const app = express();
 app.use(cors());
@@ -61,7 +63,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/', (req: Request, res: Response) => res.json({ ok: true }));
 
 const port = process.env.PORT || 4000;
-app.listen(Number(port), () => {
+const server = createServer(app);
+initSocket(server);
+
+server.listen(Number(port), () => {
   console.log(`Server running on port ${port}`);
 });
 
