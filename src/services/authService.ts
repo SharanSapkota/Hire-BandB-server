@@ -11,9 +11,14 @@ function userDisplayName(u: any) {
 
 export async function signup(payload: any) {
   try {
-    const existing = await userRepo.findUserByEmail(payload.email);
-    if (existing) {
+    const existingEmail = await userRepo.findUserByEmail(payload.email);
+    if (existingEmail) {
       throw new Error('email_in_use');
+    }
+
+    const existingPhone = await userRepo.findUserByPhone(payload.phone);
+    if (existingPhone) {
+      throw new Error('phone_in_use');
     }
 
     const hashed = await bcrypt.hash(payload.password, 12);

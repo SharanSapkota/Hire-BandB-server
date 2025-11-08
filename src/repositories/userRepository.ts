@@ -6,6 +6,12 @@ export async function findUserByEmail(email: string) {
   return userList;
 }
 
+export async function findUserByPhone(phone: string) {
+  // phone is stored in UserPhone
+  const userList = await prisma.user.findFirst({ where: { phones: { some: { phone } } }, include: { userRoles: { include: { role: true } }, UserType: true, phones: true } });
+  return userList;
+}
+
 export async function createUser(data: any) {
   try {
     const result = await prisma.$transaction(async (transaction: any) => {
