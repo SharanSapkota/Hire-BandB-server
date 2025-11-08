@@ -8,54 +8,68 @@ export async function findUserByEmail(email: string) {
 
 export async function createUser(data: any) {
   try {
-  const { email, role, ...rest } = data as any;
-  const result = await prisma.$transaction(async (transaction: any) => {
+    const result = await prisma.$transaction(async (transaction: any) => {
+      const roleCode = data?.roleCode ?? 'RENTER';
+      const role = await transaction.role.findUnique({
+        where: { code: roleCode },
+      });
 
-  const user = await transaction.user.create({ 
-    data: {
-      firstName: data?.firstName,
-      lastName: data?.lastName,
-      password: data?.password,
-      age: data?.age,
-      isActive: true,
-      emails: {
-        create: {
-          email: data?.email,
-          isPrimary: true
-        }
-      },
-      phones: {
-        create: {
-          phone: data?.phone,
-          isPrimary: true
-        }
-      },
-      details: {
-        create: {
-          address1: data?.address1,
-          address2: data?.address2,
-          city: data?.city,
-          state: data?.state,
-          country: data?.country,
-          postalCode: data?.postalCode,
-          placeId: data?.placeId
-        }
-      },
-      userRoles: {
-        create: {
-          roleId: role == 'OWNER' ? 1 : 2,
-          // userId: user?.id
-        }
+      if (!role) {
+        throw new Error('role_not_found');
       }
-    } 
-  });
- 
 
-  return user;
-},{
-  timeout: 10000,
-});
-  return result;
+      const user = await transaction.user.create({
+        data: {
+          firstName: data?.firstName,
+          secondName: data?.middleName,
+          lastName: data?.lastName,
+          password: data?.password,
+          age: data?.age,
+          isActive: true,
+          emails: data?.email
+            ? {
+                create: {
+                  email: data.email,
+                  isPrimary: true,
+                },
+              }
+            : undefined,
+          phones: data?.phone
+            ? {
+                create: {
+                  phone: data.phone,
+                  isPrimary: true,
+                },
+              }
+            : undefined,
+          details: {
+            create: {
+              address1: data?.address1,
+              address2: data?.address2,
+              city: data?.city,
+              state: data?.state,
+              country: data?.country,
+              postalCode: data?.postalCode,
+              placeId: data?.placeId,
+            },
+          },
+          userRoles: {
+            create: {
+              roleId: role.id,
+            },
+          },
+        },
+        include: {
+          userRoles: { include: { role: true } },
+          emails: true,
+        },
+      });
+
+      return user;
+    }, {
+      timeout: 10000,
+    });
+    return result;
   } catch (error) {
     console.error('Create user error:', error);
     throw error;
