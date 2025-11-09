@@ -70,6 +70,8 @@ model Bike {
   name        String
   description String?
   rentAmount  Float
+  pricePerHour Float?    @map("price_per_hour")
+  pricePerDay  Float?    @map("price_per_day")
   bikeImages  BikeImages[]
   bikeAddress BikeAddress[]
   status      BikeStatus @default(AVAILABLE)

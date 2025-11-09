@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
+import path from 'path';
 import cors from 'cors';
 import authRoutes from './routes/auth';
 import bikeRoutes from './routes/bikes';
@@ -26,10 +27,12 @@ import permissionMappingRoutes from './routes/permissionMappings';
 import userEmailRoutes from './routes/userEmails';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
+import { MEDIA_ROOT } from './middleware/upload';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/media', express.static(MEDIA_ROOT));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/bikes', bikeRoutes);
