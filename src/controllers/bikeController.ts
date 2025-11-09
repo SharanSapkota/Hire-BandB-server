@@ -2,13 +2,17 @@ import { Request, Response } from 'express';
 import { BikeService } from '../services/bikeService/bikeService';
 import { BikeRepository } from '../repositories/bikeRepository';
 import { sendSuccess, sendFailure } from '../utils/response';
+import { bikePresenter } from '../presentation/bike';
 
 const bikeRepository = new BikeRepository();
 const bikeService = new BikeService(bikeRepository);
 
 export async function list(req: Request, res: Response) {
   const bikes = await bikeService.listBikes(req.query);
-  res.json(bikes);
+  const presentableBikes = bikes.map((bike: any) => {
+    return bikePresenter(bike);
+  });
+  sendSuccess(res, presentableBikes, 200);
 }
 
 export async function listByAddress(req: Request, res: Response) {
