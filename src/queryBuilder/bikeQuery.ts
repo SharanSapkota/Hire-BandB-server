@@ -29,36 +29,62 @@ export class BikeQueryBuilder {
         return { where: { bikeAddress: bikeAddressQuery } };
     }
 
-    listBike(includes: any) {
-        let defaultQuery: any = { bikeImages: true, bikeAddress: true, category: true, owner: { select: { id: true, firstName: true, lastName: true, emails: { where: { isPrimary: true }, select: { email: true } } } } }
-        const bikeIncludes: any = {}
-        if(includes?.bikeAdress) {
-            bikeIncludes.bikeAddress = true;
+    listBike(_includes: any) {
+        const include: any = {
+            bikeImages: true,
+            bikeAddress: true,
+            category: true,
+            owner: {
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    emails: {
+                        where: { isPrimary: true },
+                        select: { email: true }
+                    }
+                }
+            }
+        };
+
+        const where: any = {};
+
+        if (this.query?.ownerId) {
+            const ownerId = Number(this.query.ownerId);
+            if (!Number.isNaN(ownerId)) {
+                where.ownerId = ownerId;
+            }
         }
 
-        if(includes.category) {
-            bikeIncludes.category = true;
+        if (this.query?.status) {
+            where.status = this.query.status;
         }
 
-        if(includes.bikeImages) {
-            bikeIncludes.bikeImages = true;
+        if (this.query?.categoryId) {
+            const categoryId = Number(this.query.categoryId);
+            if (!Number.isNaN(categoryId)) {
+                where.categoryId = categoryId;
+            }
         }
 
-        const finalQuery: any =  { include: defaultQuery }
-        if(this.query?.lat && this.query?.lng) {
-            finalQuery.bikeAddress.lat = this.query.lat;
-            finalQuery.bikeAdress.lng = this.query.lng;
+        if (this.query?.categoryName) {
+            where.category = { name: this.query.categoryName };
         }
 
-        if(this.query?.price) {
-            finalQuery.price = this.query.price;
+        if (this.query?.city || this.query?.state || this.query?.country) {
+            where.bikeAddress = {
+                some: {
+                    ...(this.query?.city ? { city: this.query.city } : {}),
+                    ...(this.query?.state ? { state: this.query.state } : {}),
+                    ...(this.query?.country ? { country: this.query.country } : {}),
+                },
+            };
         }
 
-        if(this.query.category) {
-            finalQuery.categoryId.id = this.query.categoryId
-        }
-
-        return finalQuery;
+        return {
+            include,
+            where,
+        };
 
     } 
 }
