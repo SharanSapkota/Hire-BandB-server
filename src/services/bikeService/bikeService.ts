@@ -12,11 +12,11 @@ export class BikeService {
     this.repo = repo;
   }
 
-  listBikeByAddress(query: any) {
+  async listBikesByAddress(query: { lat: number, lng: number, city?: string, state?: string, country?: string }) {
     const queryBuilder = new BikeQueryBuilder(query)
     const listBikeByAddressQuery = queryBuilder.listBikeByAddress();
     
-    return this.repo.findAllBikes(listBikeByAddressQuery);
+    return await this.repo.findAllBikes(listBikeByAddressQuery);
   }
 
   async listBikes(query: any) {

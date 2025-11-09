@@ -5,35 +5,33 @@ import prisma from '../prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
 
+function calculateAge(dob: string) {
+  const birthDate = new Date(dob);
+  const now = new Date();
+  return now.getFullYear() - birthDate.getFullYear();
+}
+
 function userDisplayName(u: any) {
   return [u.firstName, u.lastName].filter(Boolean).join(' ') || null;
 }
 
 export async function signup(payload: any) {
   try {
-    const existing = await userRepo.findUserByEmail(payload.email);
-    if (existing) {
+    const existingEmail = await userRepo.findUserByEmail(payload.email);
+    if (existingEmail) {
       throw new Error('email_in_use');
+    }
+
+    const existingPhone = await userRepo.findUserByPhone(payload.phone);
+    if (existingPhone) {
+      throw new Error('phone_in_use');
     }
 
     const hashed = await bcrypt.hash(payload.password, 12);
     const roleCode = (payload?.role ?? 'RENTER').toString().trim().toUpperCase();
     const address = payload?.address ?? {};
 
-    let age: number | undefined;
-    if (payload?.dob) {
-      const birthDate = new Date(payload.dob);
-      if (!Number.isNaN(birthDate.getTime())) {
-        const now = new Date();
-        age = now.getFullYear() - birthDate.getFullYear();
-        const hasHadBirthday =
-          now.getMonth() > birthDate.getMonth() ||
-          (now.getMonth() === birthDate.getMonth() && now.getDate() >= birthDate.getDate());
-        if (!hasHadBirthday) {
-          age = age - 1;
-        }
-      }
-    }
+    const age = calculateAge(payload.dob);
 
     const user = await userRepo.createUser({ 
       email: payload.email, 
