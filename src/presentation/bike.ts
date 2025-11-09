@@ -12,8 +12,21 @@ export const bikePresenter = (bike: any) => {
         postalCode: bike?.bikeAddress?.[0]?.postalCode,
         placeId: bike?.bikeAddress?.[0]?.placeId,
     },
-    description: bike?.description,
     rentAmount: bike?.rentAmount,
+    pricePerHour: bike?.pricePerHour,
+    pricePerDay: bike?.pricePerDay,
+    rating: bike?.rating,
+    reviews: bike?.reviews,
+    status: bike?.status,
+    startTime: bike?.startTime,
+    endTime: bike?.endTime,
+    category: {
+      id: bike?.category?.id,
+      name: bike?.category?.name,
+    },
+    owner: {
+      id: bike?.owner?.id,
+      name: bike?.owner?.firstName + ' ' + bike?.owner?.lastName,
     images: bike?.bikeImages?.map((image: any) => {
       return {
         id: image?.id,
@@ -28,5 +41,5 @@ export const bikePresenter = (bike: any) => {
       id: bike?.owner?.id,
       name: bike?.owner?.firstName + ' ' + bike?.owner?.lastName,
     },
-  };
-}
+  }
+}};

@@ -35,8 +35,9 @@ export async function get(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
     const bike = await bikeService.getBike(id);
+    const presentableBike = bikePresenter(bike);
     if (!bike) return sendFailure(res, { error: 'not found' }, 404);
-    return sendSuccess(res, bike, 200);
+    return sendSuccess(res, presentableBike, 200);
   } catch (err) {
     console.error(err);
     return sendFailure(res, { error: 'internal error' }, 500);
