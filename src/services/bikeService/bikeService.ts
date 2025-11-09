@@ -66,7 +66,7 @@ export class BikeService {
   }
 
   async updateBike(id: number, payload: any, currentUser: any) {
-    const bike = await this.repo.findBikeById(id);
+    const bike: any = await this.repo.findBikeById(id);
     if (!bike) throw new Error('not_found');
     const currentRole = currentUser.userRoles && currentUser.userRoles.length ? currentUser.userRoles[0].role : null;
     if (currentUser.id !== bike.ownerId && currentRole && (currentRole.code !== 'ADMIN' && currentRole.name !== 'ADMIN')) throw new Error('forbidden');
@@ -105,8 +105,8 @@ export class BikeService {
             name: payload.name ?? bike.name,
             description: payload.description ?? bike.description,
             rentAmount,
-            pricePerHour: pricePerHour != null ? pricePerHour : bike.pricePerHour,
-            pricePerDay: pricePerDay != null ? pricePerDay : bike.pricePerDay,
+            pricePerHour: pricePerHour != null ? pricePerHour : bike?.pricePerHour,
+            pricePerDay: pricePerDay != null ? pricePerDay : bike?.pricePerDay,
             status: payload.status ?? bike.status,
             startTime: payload.startTime ? new Date(payload.startTime) : bike.startTime,
             endTime: payload.endTime ? new Date(payload.endTime) : bike.endTime,
