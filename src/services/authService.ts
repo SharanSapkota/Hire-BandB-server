@@ -17,21 +17,40 @@ export async function signup(payload: any) {
     }
 
     const hashed = await bcrypt.hash(payload.password, 12);
+    const roleCode = (payload?.role ?? 'RENTER').toString().trim().toUpperCase();
+    const address = payload?.address ?? {};
+
+    let age: number | undefined;
+    if (payload?.dob) {
+      const birthDate = new Date(payload.dob);
+      if (!Number.isNaN(birthDate.getTime())) {
+        const now = new Date();
+        age = now.getFullYear() - birthDate.getFullYear();
+        const hasHadBirthday =
+          now.getMonth() > birthDate.getMonth() ||
+          (now.getMonth() === birthDate.getMonth() && now.getDate() >= birthDate.getDate());
+        if (!hasHadBirthday) {
+          age = age - 1;
+        }
+      }
+    }
 
     const user = await userRepo.createUser({ 
       email: payload.email, 
       password: hashed,
-      firstName: payload?.firstName, 
-      lastName: payload?.lastName, 
+      firstName: payload?.firstName,
+      middleName: payload?.middleName,
+      lastName: payload?.lastName,
       phone: payload?.phone,
-      role: payload?.role, 
-      address1: payload?.address1,
-      address2: payload?.address2,
-      city: payload?.city,
-      state: payload?.state,
-      country: payload?.country,
-      postalCode: payload?.postalCode,
-      placeId: payload?.placeId,
+      age,
+      roleCode,
+      address1: address?.address1 ?? payload?.address1,
+      address2: address?.address2 ?? payload?.address2,
+      city: address?.city ?? payload?.city,
+      state: address?.state ?? payload?.state,
+      country: address?.country ?? payload?.country,
+      postalCode: address?.postalCode ?? payload?.postalCode,
+      placeId: address?.placeId ?? payload?.placeId,
     });
 
     return { 
@@ -39,7 +58,7 @@ export async function signup(payload: any) {
         id: user.id, 
         email: payload.email, 
         name: userDisplayName(user),
-        role: user?.role,
+        role: roleCode,
       }, 
     };
   } catch (error: any) {

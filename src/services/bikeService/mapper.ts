@@ -1,36 +1,45 @@
 export const bikeCreateDto = (bike: any) => {
-    return {
-        name: bike.name,
-        description: bike.description,
-        rentAmount: bike.rentAmount,
-        status: bike.status,
-        startTime: bike.startTime,
-        endTime: bike.endTime,
-        ownerId: bike.ownerId,
-        categoryId: bike.categoryId
-    };
-}
+  return {
+    name: bike.name,
+    description: bike.description ?? null,
+    rentAmount: bike.rentAmount ?? bike.pricePerHour ?? 0,
+    pricePerHour: bike.pricePerHour ?? bike.rentAmount ?? 0,
+    pricePerDay: bike.pricePerDay ?? null,
+    status: bike.status ?? 'AVAILABLE',
+    startTime: bike.startTime ?? null,
+    endTime: bike.endTime ?? null,
+    ownerId: bike.ownerId,
+    categoryId: bike.categoryId ?? null,
+  };
+};
 
 export const bikeImagesCreateDto = (payload: any, bikeId: any) => {
-    const bikeImages = payload.bikeImages.map((image: any) => ({
-        bikeId: bikeId,
-        imageUrl: image.imageUrl
-    }));
+  const images = Array.isArray(payload.bikeImages) ? payload.bikeImages : [];
 
-    return bikeImages;
-}
+  return images.map((image: any) => ({
+    bikeId,
+    imageUrl: image.imageUrl,
+  }));
+};
 
-export const bikeAddressCreateDto = (bikeAddress: any, bikeId: any) => {
-    return {
-        bikeId: bikeId,
-        address: bikeAddress.address,
-        latitude: bikeAddress.latitude,
-        longitude: bikeAddress.longitude,
-        city: bikeAddress.city,
-        street: bikeAddress.street,
-        village: bikeAddress.village,
-        state: bikeAddress.state,
-        postalCode: bikeAddress.postalCode,
-        country: bikeAddress.country
-    };
-}
+export const bikeAddressCreateDto = (bikePayload: any, bikeId: any) => {
+  const address = bikePayload.address || {};
+
+  return {
+    bikeId,
+    address: address.address || address.formatted || bikePayload.addressLine || '',
+    latitude: address.latitude ?? bikePayload.latitude,
+    longitude: address.longitude ?? bikePayload.longitude,
+    city: address.city ?? bikePayload.city ?? null,
+    street:
+      address.street ||
+      bikePayload.street ||
+      address.address ||
+      address.formatted ||
+      bikePayload.addressLine ||
+      '',
+    state: address.state ?? bikePayload.state ?? null,
+    postalCode: address.postalCode ?? bikePayload.postalCode ?? null,
+    country: address.country ?? bikePayload.country ?? null,
+  };
+};

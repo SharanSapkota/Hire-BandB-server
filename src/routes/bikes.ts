@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as bikeController from '../controllers/bikeController';
 import { authenticate } from '../middleware/auth';
+import { uploadBikeImages } from '../middleware/upload';
 
 const router = Router();
 /**
@@ -45,8 +46,8 @@ router.get('/:id', bikeController.get);
  *             schema:
  *               $ref: '#/components/schemas/Bike'
  */
-router.post('/', bikeController.create);
-router.put('/:id', authenticate, bikeController.update);
+router.post('/', authenticate, uploadBikeImages.array('images', 5), bikeController.create);
+router.put('/:id', authenticate, uploadBikeImages.array('images', 5), bikeController.update);
 router.delete('/:id', authenticate, bikeController.remove);
 
 export default router;
