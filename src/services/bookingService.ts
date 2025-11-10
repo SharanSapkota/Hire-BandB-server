@@ -9,6 +9,14 @@ export async function listBookings() {
   return bookingRepo.findAllBookings();
 }
 
+export async function getBookingById(id: number) {
+  return bookingRepo.findBookingById(id);
+}
+
+export async function listMyBookings(userId: number) {
+  return bookingRepo.findMyBookings(userId);
+}
+
 export async function getBooking(id: number) {
   return bookingRepo.findBookingById(id);
 }
