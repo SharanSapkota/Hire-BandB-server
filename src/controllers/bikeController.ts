@@ -3,6 +3,7 @@ import { BikeService } from '../services/bikeService/bikeService';
 import { BikeRepository } from '../repositories/bikeRepository';
 import { sendSuccess, sendFailure } from '../utils/response';
 import { bikePresenter } from '../presentation/bike';
+import { ERROR_MESSAGES } from '../constants/errorConstant';
 
 const bikeRepository = new BikeRepository();
 const bikeService = new BikeService(bikeRepository);
@@ -103,18 +104,18 @@ export async function create(req: Request, res: Response) {
     };
 
     if (!payload.name) {
-      return sendFailure(res, 'Name is required', 400);
+      return sendFailure(res, { error: ERROR_MESSAGES.BAD_REQUEST }, 400);
     }
 
     if (!payload.address.address || !payload.address.street) {
-      return sendFailure(res, 'Address details are required', 400);
+      return sendFailure(res, { error: ERROR_MESSAGES.BAD_REQUEST }, 400);
     }
 
     const bike = await bikeService.createBike(payload);
-    res.status(201).json(bike);
+    return sendSuccess(res, bike, 201);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'internal error' });
+    return sendFailure(res, { error: ERROR_MESSAGES.INTERNAL_ERROR }, 500);
   }
 }
 
@@ -123,7 +124,7 @@ export async function update(req: Request, res: Response) {
     const id = Number(req.params.id);
     const currentUser = req.user;
     if (!currentUser) {
-      return sendFailure(res, 'Unauthorized', 401);
+      return sendFailure(res, { error: ERROR_MESSAGES.UNAUTHORIZED }, 401);
     }
 
     const files = (req.files as Express.Multer.File[]) || [];
@@ -197,10 +198,10 @@ export async function update(req: Request, res: Response) {
     const updated = await bikeService.updateBike(id, payload, currentUser);
     res.json(updated);
   } catch (err: any) {
-    if (err.message === 'not_found') return res.status(404).json({ error: 'not found' });
-    if (err.message === 'forbidden') return res.status(403).json({ error: 'forbidden' });
+    if (err.message === ERROR_MESSAGES.NOT_FOUND) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
+    if (err.message === ERROR_MESSAGES.FORBIDDEN) return sendFailure(res, { error: ERROR_MESSAGES.FORBIDDEN }, 403);
     console.error(err);
-    res.status(500).json({ error: 'internal error' });
+    return sendFailure(res, { error: ERROR_MESSAGES.INTERNAL_ERROR }, 500);
   }
 }
 
@@ -210,9 +211,9 @@ export async function remove(req: Request, res: Response) {
     await bikeService.deleteBike(id, req.user);
     res.json({ ok: true });
   } catch (err: any) {
-    if (err.message === 'not_found') return res.status(404).json({ error: 'not found' });
-    if (err.message === 'forbidden') return res.status(403).json({ error: 'forbidden' });
+    if (err.message === ERROR_MESSAGES.NOT_FOUND) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
+    if (err.message === ERROR_MESSAGES.FORBIDDEN) return sendFailure(res, { error: ERROR_MESSAGES.FORBIDDEN }, 403);
     console.error(err);
-    res.status(500).json({ error: 'internal error' });
+    return sendFailure(res, { error: ERROR_MESSAGES.INTERNAL_ERROR }, 500);
   }
 }

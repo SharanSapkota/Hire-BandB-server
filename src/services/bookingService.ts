@@ -1,6 +1,9 @@
 import * as bookingRepo from '../repositories/bookingRepository';
 import prisma from '../prisma';
 import * as notifService from './notificationService';
+import { BOOKING_STATUS } from '../constants/bikeConstants';
+import { ERROR_MESSAGES } from '../constants/errorConstant';
+import ROLES from '../constants/roleConstant';
 
 export async function listBookings() {
   return bookingRepo.findAllBookings();
@@ -36,15 +39,38 @@ export async function createBooking(payload: any, currentUser: any) {
   return created;
 }
 
+export async function rejectBooking(id: number, currentUser: any) {
+  const booking = await bookingRepo.findBookingById(id);
+  if (!booking) throw new Error(ERROR_MESSAGES.NOT_FOUND);
+  if (booking.ownerId !== currentUser.id) throw new Error(ERROR_MESSAGES.FORBIDDEN);
+  if (booking.status !== BOOKING_STATUS.PENDING) throw new Error(ERROR_MESSAGES.BOOKING_NOT_PENDING);
+  const updated = await bookingRepo.updateBooking(id, { status: BOOKING_STATUS.REJECTED });
+
+  await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, title: 'Booking rejected', message: `Your booking for bike ${booking.bike.name} was rejected` });
+  return updated;
+}
+
+export async function approveBooking(id: number, currentUser: any) {
+  const booking = await bookingRepo.findBookingById(id);
+  if (!booking) throw new Error(ERROR_MESSAGES.NOT_FOUND);
+  if (booking.ownerId !== currentUser.id) throw new Error(ERROR_MESSAGES.FORBIDDEN);
+  if (booking.status !== BOOKING_STATUS.PENDING) throw new Error(ERROR_MESSAGES.BOOKING_NOT_PENDING);
+  const updated = await bookingRepo.updateBooking(id, { status: BOOKING_STATUS.APPROVED });
+
+  await notifService.markNotificationRead(booking.userId);
+  await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, title: 'Booking accepted', message: `Your booking for bike ${booking.bike.name} was accepted` });
+  return updated;
+}
+
 export async function updateBooking(id: number, payload: any, currentUser: any) {
   const booking = await bookingRepo.findBookingById(id);
-  if (!booking) throw new Error('not_found');
+  if (!booking) throw new Error(ERROR_MESSAGES.NOT_FOUND);
 
   // only renter or owner or admin can update
   const role = currentUser.userRoles && currentUser.userRoles.length ? currentUser.userRoles[0].role : null;
-  const isOwner = currentUser.id === booking.ownerId || (role && (role.code === 'ADMIN' || role.name === 'ADMIN'));
+  const isOwner = currentUser.id === booking.ownerId || (role && (role.code === ROLES.ADMIN || role.name === ROLES.ADMIN));
   const isRenter = currentUser.id === booking.userId;
-  if (!isOwner && !isRenter) throw new Error('forbidden');
+  if (!isOwner && !isRenter) throw new Error(ERROR_MESSAGES.FORBIDDEN);
 
   const data: any = {};
   if (payload.status) data.status = payload.status;
@@ -53,15 +79,13 @@ export async function updateBooking(id: number, payload: any, currentUser: any) 
   if (payload.endTime) data.endTime = new Date(payload.endTime);
 
   const updated = await bookingRepo.updateBooking(id, data);
-  // notify both parties about status change
   await notifService.createNotification({ userId: booking.ownerId, bookingId: updated.id, title: 'Booking updated', message: `Booking ${updated.id} status changed to ${updated.status}` });
-  // await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, title: 'Booking updated', message: `Your booking ${updated.id} status changed to ${updated.status}` });
   return updated;
 }
 
 export async function deleteBooking(id: number, currentUser: any) {
   const booking = await bookingRepo.findBookingById(id);
-  if (!booking) throw new Error('not_found');
+  if (!booking) throw new Error(ERROR_MESSAGES.NOT_FOUND);
   const role2 = currentUser.userRoles && currentUser.userRoles.length ? currentUser.userRoles[0].role : null;
   if (currentUser.id !== booking.userId && currentUser.id !== booking.ownerId && !(role2 && (role2.code === 'ADMIN' || role2.name === 'ADMIN'))) throw new Error('forbidden');
   return bookingRepo.deleteBooking(id);
