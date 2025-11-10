@@ -3,7 +3,11 @@ import { emitToUser } from '../lib/socket';
 import { OWNER_NOTIFICATION_EVENT } from '../socket/socket.constant';
 
 export async function listNotifications(userId: number) {
-  return notifRepo.findNotificationsForUser(userId);
+  return await notifRepo.findNotificationsForUser(userId);
+}
+
+export async function listNotificationCount(userId: number) {
+  return notifRepo.findNotificationCount(userId);
 }
 
 export async function getNotification(id: number) {
