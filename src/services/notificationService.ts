@@ -12,7 +12,7 @@ export async function getNotification(id: number) {
 export async function createNotification(payload: any) {
   const notification = await notifRepo.createNotification(payload);
   if (payload?.userId) {
-    emitToUser(payload.userId, 'notification:new', notification);
+    emitToUser(payload.userId, 'booking:created', notification);
   }
   return notification;
 }
