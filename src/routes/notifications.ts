@@ -4,6 +4,7 @@ import * as notifController from '../controllers/notificationController';
 
 const router = Router();
 router.get('/', authenticate, notifController.list);
+router.get('/count', authenticate, notifController.count);
 router.post('/:id/read', authenticate, notifController.markRead);
 
 export default router;

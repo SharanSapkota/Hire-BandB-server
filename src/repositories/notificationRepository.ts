@@ -4,6 +4,10 @@ export function findNotificationsForUser(userId: number) {
   return prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } });
 }
 
+export function findNotificationCount(userId: number) {
+  return prisma.notification.count({ where: { userId, read: false } });
+}
+
 export function findNotificationById(id: number) {
   return prisma.notification.findUnique({ where: { id } });
 }
