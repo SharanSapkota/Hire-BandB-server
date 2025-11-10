@@ -8,6 +8,11 @@ export async function list(req: Request, res: Response) {
   res.json(bookings);
 }
 
+export async function listMyBookings(req: Request, res: Response) {
+  const bookings = await bookingService.getBookingById(req.user.id);
+  return sendSuccess(res, bookings, 200);
+}
+
 export async function get(req: Request, res: Response) {
   const id = Number(req.params.id);
   const booking = await bookingService.getBooking(id);

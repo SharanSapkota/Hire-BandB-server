@@ -8,6 +8,10 @@ export function findBookingById(id: number) {
   return prisma.booking.findUnique({ where: { id }, include: { user: true, bike: true, owner: true } });
 }
 
+export function findMyBookings(userId: number) {
+  return prisma.booking.findMany({ where: { userId }, include: { user: true, bike: true, owner: true } });
+}
+
 export function createBooking(data: any) {
   return prisma.booking.create({ data, include: { user: true, bike: true, owner: true } });
 }
