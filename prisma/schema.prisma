@@ -110,6 +110,8 @@ model BikeAddress {
 }
 
 enum BookingStatus {
+  APPROVED
+  REJECTED
   PENDING
   ACTIVE
   COMPLETED
