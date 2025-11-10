@@ -32,7 +32,7 @@ export async function createBooking(payload: any, currentUser: any) {
   // notify owner
   await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, title: 'New booking', message: `Bike ${bike.name} was booked by ${renterName}` });
   // notify renter
-  await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, title: 'Booking created', message: `Your booking for bike ${bike.name} is pending` });
+  // await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, title: 'Booking created', message: `Your booking for bike ${bike.name} is pending` });
   return created;
 }
 
@@ -55,7 +55,7 @@ export async function updateBooking(id: number, payload: any, currentUser: any) 
   const updated = await bookingRepo.updateBooking(id, data);
   // notify both parties about status change
   await notifService.createNotification({ userId: booking.ownerId, bookingId: updated.id, title: 'Booking updated', message: `Booking ${updated.id} status changed to ${updated.status}` });
-  await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, title: 'Booking updated', message: `Your booking ${updated.id} status changed to ${updated.status}` });
+  // await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, title: 'Booking updated', message: `Your booking ${updated.id} status changed to ${updated.status}` });
   return updated;
 }
 
