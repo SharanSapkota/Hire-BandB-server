@@ -1,3 +1,5 @@
+import { formatDate } from "../utils/common";
+
 export const bikePresenter = (bike: any) => {
   return {
     id: bike?.id,
@@ -18,8 +20,8 @@ export const bikePresenter = (bike: any) => {
     rating: bike?.rating,
     reviews: bike?.reviews,
     status: bike?.status,
-    startTime: bike?.startTime,
-    endTime: bike?.endTime,
+    startTime: formatDate(bike?.startTime),
+    endTime: formatDate(bike?.endTime),
     category: {
       id: bike?.category?.id,
       name: bike?.category?.name,

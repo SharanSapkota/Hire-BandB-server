@@ -9,7 +9,7 @@ export function findBookingById(id: number) {
 }
 
 export function findMyBookings(userId: number) {
-  return prisma.booking.findMany({ where: { userId }, include: { user: true, bike: true, owner: true } });
+  return prisma.booking.findMany({ where: { userId }, include: { user: true, bike: { include: { bikeAddress: true } }, owner: true } });
 }
 
 export function createBooking(data: any) {

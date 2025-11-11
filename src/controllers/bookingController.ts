@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as bookingService from '../services/bookingService';
 import { sendFailure, sendSuccess } from '../utils/response';
 import { ERROR_MESSAGES } from '../constants/errorConstant';
+import { bookingPresenter } from '../presentation/booking';
 
 export async function list(req: Request, res: Response) {
   const bookings = await bookingService.listBookings();
@@ -9,8 +10,9 @@ export async function list(req: Request, res: Response) {
 }
 
 export async function listMyBookings(req: Request, res: Response) {
-  const bookings = await bookingService.getBookingById(req.user.id);
-  return sendSuccess(res, bookings, 200);
+  const bookings = await bookingService.listMyBookings(req.user.id);
+  const myBookings = bookingPresenter(bookings);
+  return sendSuccess(res, myBookings, 200);
 }
 
 export async function get(req: Request, res: Response) {
