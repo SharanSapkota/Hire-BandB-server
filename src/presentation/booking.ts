@@ -6,7 +6,7 @@ export const bookingPresenter = (booking: any): any => {
    return booking.map((booking: any) => {
     return {
         id: booking.id,
-    bike: bikePresenter(booking.bike),
+        bike: bikePresenter(booking.bike),
         user: userPresenter(booking.user),
         owner: userPresenter(booking.owner),
         status: booking.status,
