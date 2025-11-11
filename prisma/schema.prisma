@@ -126,6 +126,8 @@ model Booking {
   bikeId        Int
   owner         User           @relation("ownerBookings", fields: [ownerId], references: [id])
   ownerId       Int
+  price         String?
+  currency      String?        
   status        BookingStatus  @default(PENDING)
   completedAt   DateTime?
   startTime     DateTime?
