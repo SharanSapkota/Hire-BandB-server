@@ -37,13 +37,12 @@ export async function get(req: Request, res: Response) {
     const id = Number(req.params.id);
     const bike = await bikeService.getBike(id);
     const presentableBike = bikePresenter(bike);
-    if (!bike) return sendFailure(res, { error: 'not found' }, 404);
+    if (!bike) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
     return sendSuccess(res, presentableBike, 200);
   } catch (err) {
     console.error(err);
-    return sendFailure(res, { error: 'internal error' }, 500);
+    return sendFailure(res, { error: ERROR_MESSAGES.INTERNAL_ERROR }, 500);
   }
-
 }
 
 const toNumberOrNull = (value: any) => {
@@ -60,7 +59,7 @@ export async function create(req: Request, res: Response) {
   try {
     const currentUser = req.user;
     if (!currentUser) {
-      return sendFailure(res, 'Unauthorized', 401);
+      return sendFailure(res, { error: ERROR_MESSAGES.UNAUTHORIZED }, 401);
     }
 
     const files = (req.files as Express.Multer.File[]) || [];
@@ -77,7 +76,7 @@ export async function create(req: Request, res: Response) {
     const longitude = toNumberOrNull(req.body.longitude ?? addressRaw?.lng);
 
     if (latitude === null || longitude === null) {
-      return sendFailure(res, 'Latitude and longitude are required', 400);
+      return sendFailure(res, { error: ERROR_MESSAGES.BAD_REQUEST }, 400);
     }
 
     const payload: any = {
@@ -156,7 +155,7 @@ export async function update(req: Request, res: Response) {
       .filter(Boolean);
 
     if (existingImages.length + files.length > 5) {
-      return sendFailure(res, 'Maximum 5 images allowed per bike', 400);
+      return sendFailure(res, { error: ERROR_MESSAGES.BAD_REQUEST }, 400);
     }
 
     const addressRaw = parseJson<any>(req.body.address);
@@ -196,7 +195,7 @@ export async function update(req: Request, res: Response) {
     }
 
     const updated = await bikeService.updateBike(id, payload, currentUser);
-    res.json(updated);
+    return sendSuccess(res, updated, 200);
   } catch (err: any) {
     if (err.message === ERROR_MESSAGES.NOT_FOUND) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
     if (err.message === ERROR_MESSAGES.FORBIDDEN) return sendFailure(res, { error: ERROR_MESSAGES.FORBIDDEN }, 403);
@@ -209,7 +208,7 @@ export async function remove(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
     await bikeService.deleteBike(id, req.user);
-    res.json({ ok: true });
+    return sendSuccess(res, { ok: true }, 200);
   } catch (err: any) {
     if (err.message === ERROR_MESSAGES.NOT_FOUND) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
     if (err.message === ERROR_MESSAGES.FORBIDDEN) return sendFailure(res, { error: ERROR_MESSAGES.FORBIDDEN }, 403);
