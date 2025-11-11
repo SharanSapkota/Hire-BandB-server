@@ -41,7 +41,6 @@ model User {
   bikes                       Bike[]
   bookings                    Booking[]            @relation("renterBookings")
   ownerBookings               Booking[]            @relation("ownerBookings")
-  notifications               Notification[]
   reviewsGiven                Review[]             @relation("reviewer")
   reviewsReceived             Review[]             @relation("reviewee")
   locations                   Location[]
