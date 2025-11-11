@@ -2,6 +2,11 @@ import * as userRepo from '../repositories/userRepository';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../prisma';
+import {
+  createVerificationToken,
+  sendVerificationEmail,
+  verifyToken as consumeVerificationToken,
+} from './emailVerificationService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
 
@@ -51,13 +56,21 @@ export async function signup(payload: any) {
       placeId: address?.placeId ?? payload?.placeId,
     });
 
+    try {
+      const verification = await createVerificationToken(user.id);
+      await sendVerificationEmail(payload.email, verification.token);
+    } catch (error) {
+      console.error('Error sending verification email', error);
+    }
+
     return { 
       user: { 
         id: user.id, 
         email: payload.email, 
         name: userDisplayName(user),
         role: roleCode,
-      }, 
+      },
+      requiresEmailVerification: true,
     };
   } catch (error: any) {
     console.error('Signup error:', error);
@@ -77,6 +90,10 @@ export async function login(payload: { email: string; password: string }) {
     const isPasswordValid = await bcrypt.compare(payload.password, user.password);
     if (!isPasswordValid) {
       throw new Error('invalid_credentials');
+    }
+
+    if (!user.isEmailVerified) {
+      throw new Error('email_not_verified');
     }
 
     // Get user role
@@ -112,4 +129,28 @@ export async function login(payload: { email: string; password: string }) {
     console.error('Login error:', error);
     throw error;
   }
+}
+
+export async function verifyEmail(token: string) {
+  await consumeVerificationToken(token);
+  return { success: true };
+}
+
+export async function resendVerification(email: string) {
+  const user = await userRepo.findUserByEmail(email);
+  if (!user) {
+    throw new Error('user_not_found');
+  }
+
+  if (user.isEmailVerified) {
+    return { alreadyVerified: true };
+  }
+
+  const primaryEmail = user.emails?.find((e: any) => e.isPrimary) || user.emails?.[0];
+  const targetEmail = primaryEmail?.email || email;
+
+  const verification = await createVerificationToken(user.id);
+  await sendVerificationEmail(targetEmail, verification.token);
+
+  return { success: true };
 }

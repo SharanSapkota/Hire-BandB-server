@@ -29,6 +29,7 @@ model User {
   password                    String
   age                         Int?
   isActive                    Boolean              @default(true) @map("is_active")
+  isEmailVerified             Boolean              @default(false)
   emails                      UserEmail[]
   phones                      UserPhone[]
   notifications               Notification[]   @relation("UserNotifications")
@@ -40,6 +41,7 @@ model User {
   bikes                       Bike[]
   bookings                    Booking[]            @relation("renterBookings")
   ownerBookings               Booking[]            @relation("ownerBookings")
+  notifications               Notification[]
   reviewsGiven                Review[]             @relation("reviewer")
   reviewsReceived             Review[]             @relation("reviewee")
   locations                   Location[]
@@ -57,6 +59,7 @@ model User {
   UserPaymentMethod           UserPaymentMethod[]
   Product                     Product[]
   ActivityLog                 ActivityLog[]
+  emailVerifications          EmailVerification[]
 }
 
 model Category {
@@ -223,8 +226,19 @@ model UserEmail {
   email     String
   isActive  Boolean @default(true)
   isPrimary Boolean @default(false)
+  isVerified Boolean @default(false)
   user      User    @relation(fields: [userId], references: [id])
   userId    Int
+}
+
+model EmailVerification {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
 }
 
 model UserPhone {
