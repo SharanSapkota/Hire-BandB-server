@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login } from '../controllers/authController';
+import * as authController from '../controllers/authController';
 import { validateSignup, validateLogin } from '../utils/validation';
 
 const router = Router();
@@ -61,7 +61,9 @@ const router = Router();
  *       500:
  *         description: Internal server error
  */
-router.post('/signup', validateSignup, signup);
+router.post('/signup', validateSignup, authController.signup);
+router.post('/verify-email', authController.verifyEmail);
+router.post('/resend-verification', authController.resendVerification);
 
 /**
  * @openapi
@@ -115,6 +117,6 @@ router.post('/signup', validateSignup, signup);
  *       500:
  *         description: Internal server error
  */
-router.post('/login', validateLogin, login);
+router.post('/login', validateLogin, authController.login);
 
 export default router;
