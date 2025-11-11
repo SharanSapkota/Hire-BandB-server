@@ -1,4 +1,4 @@
-# HireBandB Backend
+# GearQuest Backend
 
 Express + Prisma + PostgreSQL backend for bike rentals.
 
