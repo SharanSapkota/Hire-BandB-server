@@ -1,38 +1,37 @@
-# syntax=docker/dockerfile:1
+# Stage 1: Build
+FROM node:20-alpine AS builder
 
-FROM node:20-alpine AS base
 WORKDIR /app
 
-COPY package*.json ./
-COPY prisma ./prisma
-COPY tsconfig.json ./
-COPY src ./src
+# Install build dependencies (including OpenSSL)
+RUN apk add --no-cache openssl libc6-compat
 
+COPY package*.json ./
 RUN npm ci
 
-# Generate Prisma client and build TypeScript -> JavaScript
+COPY tsconfig.json ./
+COPY prisma ./prisma
+COPY src ./src
+
 RUN npx prisma generate
 RUN npm run build
 
+# Stage 2: Production
 FROM node:20-alpine AS production
-WORKDIR /app
 
+WORKDIR /app
 ENV NODE_ENV=production
 
-COPY package*.json ./
+RUN apk add --no-cache openssl libc6-compat
 
-# Install only production dependencies
+COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy build artifacts and Prisma schema
-COPY --from=base /app/dist ./dist
-COPY --from=base /app/prisma ./prisma
-
-# Copy Prisma generated client from the builder layer
-COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 4000
 
 CMD ["node", "dist/index.js"]
-
