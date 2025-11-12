@@ -1,5 +1,6 @@
 import { BASE_URL } from "../base/base";
 import { formatDate } from "../utils/common";
+import { bookingPresenter } from "./booking";
 
 export const bikePresenter = (bike: any) => {
   return {
@@ -23,6 +24,7 @@ export const bikePresenter = (bike: any) => {
     status: bike?.status,
     startTime: formatDate(bike?.startTime),
     endTime: formatDate(bike?.endTime),
+    bookings: bookingPresenter(bike?.bookings),
     category: {
       id: bike?.category?.id,
       name: bike?.category?.name,
