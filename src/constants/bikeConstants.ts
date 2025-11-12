@@ -12,3 +12,13 @@ export const BOOKING_STATUS = {
   ACTIVE: 'ACTIVE',
   COMPLETED: 'COMPLETED',
 };
+
+export const NOTIFICATION_TYPE = {
+  RENTAL_REQUEST: 'rental_request',
+  RENTAL_ACCEPTED: 'rental_accepted',
+  RENTAL_REJECTED: 'rental_rejected',
+  RENTAL_CANCELLED: 'rental_cancelled',
+  RENTAL_COMPLETED: 'rental_completed',
+  RENTAL_ACTIVE: 'rental_active',
+};
+
