@@ -22,7 +22,7 @@ const router = Router();
  *                 $ref: '#/components/schemas/Bike'
  */
 router.get('/', bikeController.list);
-router.get('/:id', bikeController.get);
+router.get('/:id', authenticate, bikeController.get);
 /**
  * @openapi
  * /api/bikes:
