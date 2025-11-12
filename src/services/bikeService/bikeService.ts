@@ -6,7 +6,7 @@ import { bikeAddressCreateDto, bikeCreateDto, bikeImagesCreateDto } from './mapp
 import { BikeQueryBuilder } from '../../queryBuilder/bikeQuery';
 import { QueryBuilder } from '../../queryBuilder/query';
 import { MEDIA_ROOT } from '../../middleware/upload';
-
+import * as bookingService from '../bookingService';
 export class BikeService {
   constructor(private repo: BikeRepository) {
     this.repo = repo;
@@ -25,8 +25,13 @@ export class BikeService {
     return this.repo.findAllBikes(listBikeQuery);
   }
 
-  async getBike(id: number) {
-    return this.repo.findBikeById(id);
+  async getBike(id: number, currentUser: any) {
+    const myBike = await this.repo.findBikeById(id);
+    const myBikeBookings = await bookingService.bookingsByBikeId(id, currentUser.id);
+    return {
+      ...myBike,
+      bookings: myBikeBookings,
+    };
   }
 
   async createBike(payload: any) {
