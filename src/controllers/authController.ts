@@ -21,7 +21,7 @@ export async function signup(req: Request, res: Response) {
       return sendFailure(res, 'Invalid role selected', 400);
     }
 
-    return sendFailure(res, 'An unexpected error occurred during signup', 500);
+    return sendFailure(res, err.message ?? 'An unexpected error occurred during signup', 500);
   }
 }
 

@@ -3,7 +3,7 @@ import prisma from '../prisma';
 import { sendEmail } from '../utils/mailer';
 
 const TOKEN_EXPIRATION_HOURS = Number(process.env.EMAIL_VERIFICATION_EXPIRATION_HOURS || 24);
-const APP_BASE_URL = process.env.APP_BASE_URL || 'https://gear-quest-hub.onrender.com';
+const APP_BASE_URL = 'https://gear-quest-hub.onrender.com';
 
 function buildVerificationUrl(token: string) {
   const base = APP_BASE_URL.replace(/\/$/, '');
