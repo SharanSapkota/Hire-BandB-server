@@ -1,7 +1,7 @@
 import * as bookingRepo from '../repositories/bookingRepository';
 import prisma from '../prisma';
 import * as notifService from './notificationService';
-import { BOOKING_STATUS } from '../constants/bikeConstants';
+import { BOOKING_STATUS, NOTIFICATION_TYPE } from '../constants/bikeConstants';
 import { ERROR_MESSAGES } from '../constants/errorConstant';
 import ROLES from '../constants/roleConstant';
 
@@ -41,7 +41,7 @@ export async function createBooking(payload: any, currentUser: any) {
   const renterEmail = currentUser.emails && currentUser.emails.length ? currentUser.emails.find((e: any) => e.isPrimary)?.email || currentUser.emails[0].email : null;
   const renterName = [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' ') || renterEmail;
   // notify owner
-  await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, title: 'New booking', message: `Bike ${bike.name} was booked by ${renterName}` });
+  await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, type: 'rental_request', title: 'New booking', message: `Bike ${bike.name} was booked by ${renterName}` });
   // notify renter
   // await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, title: 'Booking created', message: `Your booking for bike ${bike.name} is pending` });
   return created;
@@ -66,7 +66,7 @@ export async function approveBooking(id: number, currentUser: any) {
   const updated = await bookingRepo.updateBooking(id, { status: BOOKING_STATUS.APPROVED });
 
   await notifService.markNotificationRead(booking.userId);
-  await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, title: 'Booking accepted', message: `Your booking for bike ${booking.bike.name} was accepted` });
+  await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, type: NOTIFICATION_TYPE.RENTAL_ACCEPTED, title: 'Booking accepted', message: `Your booking for bike ${booking.bike.name} was accepted` });
   return updated;
 }
 
