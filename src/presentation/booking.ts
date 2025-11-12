@@ -3,6 +3,16 @@ import { bikePresenter } from "./bike";
 import { userPresenter } from "./user";
 
 export const bookingPresenter = (booking: any): any => {
+    if(!booking) return null;
+    if(!Array.isArray(booking)) {
+        return {
+            id: booking.id,
+            bike: bikePresenter(booking.bike),
+            user: userPresenter(booking.user),
+            owner: userPresenter(booking.owner),
+        };
+    }
+   
    return booking.map((booking: any) => {
     return {
         id: booking.id,
