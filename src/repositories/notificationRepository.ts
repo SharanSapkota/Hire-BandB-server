@@ -1,7 +1,7 @@
 import prisma from '../prisma';
 
 export function findNotificationsForUser(userId: number) {
-  return prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, include: { booking: true } });
+  return prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, include: { booking: { include: { bike: {include: { bikeAddress: true }}, owner: true, user: true } } } });
 }
 
 export function findNotificationCount(userId: number) {
