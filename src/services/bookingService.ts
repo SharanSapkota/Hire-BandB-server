@@ -13,6 +13,10 @@ export async function getBookingById(id: number) {
   return bookingRepo.findBookingById(id);
 }
 
+export async function bookingsByBikeId(bikeId: number, userId: number) {
+  return bookingRepo.findBookingsByBikeId(bikeId, userId);
+}
+
 export async function listMyBookings(userId: number) {
   return bookingRepo.findMyBookings(userId);
 }
