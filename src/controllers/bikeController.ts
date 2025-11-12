@@ -35,7 +35,8 @@ export async function listByAddress(req: Request, res: Response) {
 export async function get(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
-    const bike = await bikeService.getBike(id);
+    const currentUser = req.user;
+    const bike = await bikeService.getBike(id, currentUser);
     const presentableBike = bikePresenter(bike);
     if (!bike) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
     return sendSuccess(res, presentableBike, 200);
