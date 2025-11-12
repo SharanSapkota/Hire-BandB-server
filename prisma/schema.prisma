@@ -137,6 +137,8 @@ model Booking {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   notifications Notification[]
+  paymentTransaction   PaymentTransaction? @relation("BookingPayment", fields: [paymentTransactionId], references: [id])
+  paymentTransactionId Int?                @unique
 }
 
 model Notification {
@@ -407,6 +409,7 @@ model PaymentTransaction {
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   Rental               Rental[]
+  booking              Booking?      @relation("BookingPayment")
 }
 
 model ProductAssigned {
