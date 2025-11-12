@@ -1,3 +1,4 @@
+import { BASE_URL } from "../base/base";
 import { formatDate } from "../utils/common";
 
 export const bikePresenter = (bike: any) => {
@@ -32,7 +33,7 @@ export const bikePresenter = (bike: any) => {
     images: bike?.bikeImages?.map((image: any) => {
       return {
         id: image?.id,
-        url: image?.imageUrl,
+        url: BASE_URL + image?.imageUrl,
       };
     }),
     category: {
