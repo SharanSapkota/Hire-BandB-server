@@ -66,7 +66,7 @@ export async function approveBooking(id: number, currentUser: any) {
   const booking = await bookingRepo.findBookingById(id);
   if (!booking) throw new Error(ERROR_MESSAGES.NOT_FOUND);
   if (booking.ownerId !== currentUser.id) throw new Error(ERROR_MESSAGES.FORBIDDEN);
-  if (booking.status !== BOOKING_STATUS.PENDING) throw new Error(ERROR_MESSAGES.BOOKING_NOT_PENDING);
+  // if (booking.status !== BOOKING_STATUS.PENDING) throw new Error(ERROR_MESSAGES.BOOKING_NOT_PENDING);
   const updated = await bookingRepo.updateBooking(id, { status: BOOKING_STATUS.APPROVED });
 
   await notifService.markNotificationRead(booking.userId);

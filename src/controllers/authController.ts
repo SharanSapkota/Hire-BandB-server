@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
+import * as passwordResetService from '../services/passwordResetService';
 import { sendFailure, sendSuccess } from '../utils/response';
 
 export async function signup(req: Request, res: Response) {
@@ -96,5 +97,65 @@ export async function resendVerification(req: Request, res: Response) {
     }
 
     return sendFailure(res, 'Could not resend verification email', 500);
+  }
+}
+
+export async function forgotPassword(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return sendFailure(res, 'Email is required', 400);
+    }
+
+    await authService.forgotPassword(email);
+    return sendSuccess(res, { sent: true }, 200);
+  } catch (error: any) {
+    console.error('forgotPassword error:', error);
+
+    if (error.message === 'user_not_found') {
+      // Don't reveal if user exists or not for security
+      return sendSuccess(res, { sent: true }, 200);
+    }
+
+    return sendFailure(res, 'Could not send password reset email', 500);
+  }
+}
+
+export async function resetPassword(req: Request, res: Response) {
+  try {
+    const { token, password } = req.body;
+    if (!token) {
+      return sendFailure(res, 'Reset token is required', 400);
+    }
+    if (!password) {
+      return sendFailure(res, 'New password is required', 400);
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return sendFailure(res, 'Password must be at least 8 characters', 400);
+    }
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return sendFailure(res, 'Password must contain uppercase, lowercase, and number', 400);
+    }
+
+    await passwordResetService.resetPassword(token, password);
+    return sendSuccess(res, { reset: true }, 200);
+  } catch (error: any) {
+    console.error('resetPassword error:', error);
+
+    if (error.message === 'invalid_token') {
+      return sendFailure(res, 'Invalid reset token', 400);
+    }
+
+    if (error.message === 'token_already_used') {
+      return sendFailure(res, 'This reset link has already been used', 400);
+    }
+
+    if (error.message === 'token_expired') {
+      return sendFailure(res, 'Reset link has expired', 400);
+    }
+
+    return sendFailure(res, 'Could not reset password', 500);
   }
 }

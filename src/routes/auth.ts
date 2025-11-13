@@ -118,5 +118,7 @@ router.post('/resend-verification', authController.resendVerification);
  *         description: Internal server error
  */
 router.post('/login', validateLogin, authController.login);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
 
 export default router;
