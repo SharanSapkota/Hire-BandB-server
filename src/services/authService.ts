@@ -154,3 +154,19 @@ export async function resendVerification(email: string) {
 
   return { success: true };
 }
+
+export async function forgotPassword(email: string) {
+  const user = await userRepo.findUserByEmail(email);
+  if (!user) {
+    throw new Error('user_not_found');
+  }
+
+  const primaryEmail = user.emails?.find((e: any) => e.isPrimary) || user.emails?.[0];
+  const targetEmail = primaryEmail?.email || email;
+
+  const { createPasswordResetToken, sendPasswordResetEmail } = await import('./passwordResetService');
+  const resetToken = await createPasswordResetToken(user.id);
+  await sendPasswordResetEmail(targetEmail, resetToken.token);
+
+  return { success: true };
+}
