@@ -5,7 +5,7 @@ export function findAllBookings() {
 }
 
 export function findBookingById(id: number) {
-  return prisma.booking.findUnique({ where: { id }, include: { user: true, bike: true, owner: true } });
+  return prisma.booking.findUnique({ where: { id }, include: { user: true, bike: { include: {bikeAddress: true, bikeImages: true}}, owner: true } });
 }
 
 export function findMyBookings(userId: number) {
