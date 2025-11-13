@@ -29,22 +29,14 @@ export const bikePresenter = (bike: any) => {
       id: bike?.category?.id,
       name: bike?.category?.name,
     },
-    owner: {
-      id: bike?.owner?.id,
-      name: bike?.owner?.firstName + ' ' + bike?.owner?.lastName,
     images: bike?.bikeImages?.map((image: any) => {
       return {
         id: image?.id,
         url: BASE_URL + image?.imageUrl,
       };
     }),
-    category: {
-      id: bike?.category?.id,
-      name: bike?.category?.name,
-    },
     owner: {
       id: bike?.owner?.id,
       name: bike?.owner?.firstName + ' ' + bike?.owner?.lastName,
     },
-  }
 }};
