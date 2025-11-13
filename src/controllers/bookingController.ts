@@ -3,6 +3,7 @@ import * as bookingService from '../services/bookingService';
 import { sendFailure, sendSuccess } from '../utils/response';
 import { ERROR_MESSAGES } from '../constants/errorConstant';
 import { bookingPresenter } from '../presentation/booking';
+import { bikePresenter } from '../presentation/bike';
 
 export async function list(req: Request, res: Response) {
   const bookings = await bookingService.listBookings();
@@ -18,8 +19,9 @@ export async function listMyBookings(req: Request, res: Response) {
 export async function get(req: Request, res: Response) {
   const id = Number(req.params.id);
   const booking = await bookingService.getBooking(id);
+  const presentableBooking = bookingPresenter(booking)
   if (!booking) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
-  return sendSuccess(res, booking, 200);
+  return sendSuccess(res, presentableBooking, 200);
 }
 
 export async function create(req: Request, res: Response) {
