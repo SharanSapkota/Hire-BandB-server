@@ -45,9 +45,9 @@ export async function createBooking(payload: any, currentUser: any) {
   const renterEmail = currentUser.emails && currentUser.emails.length ? currentUser.emails.find((e: any) => e.isPrimary)?.email || currentUser.emails[0].email : null;
   const renterName = [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' ') || renterEmail;
   // notify owner
-  await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, type: 'rental_request', title: 'New booking', message: `Bike ${bike.name} was booked by ${renterName}` });
+  await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, type: NOTIFICATION_TYPE.RENTAL_REQUEST, title: 'New booking', message: `Bike ${bike.name} was booked by ${renterName}` });
   // notify renter
-  // await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, title: 'Booking created', message: `Your booking for bike ${bike.name} is pending` });
+  await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, type: NOTIFICATION_TYPE.RENTAL_REQUEST, title: 'Booking Created', message: `Your booking for bike ${bike.name} is pending` });
   return created;
 }
 
