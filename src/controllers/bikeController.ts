@@ -92,6 +92,7 @@ export async function create(req: Request, res: Response) {
       status: req.body.status || 'AVAILABLE',
       categoryName: req.body.category || req.body.categoryName,
       bikeImages: files.map((file) => ({ imageUrl: normaliseImagePath(file.filename) })),
+      autoAccept: req.body.autoAccept || false,
       address: {
         address: addressRaw?.formatted || req.body.location || req.body.addressLine || '',
         street: req.body.street || addressRaw?.street || addressRaw?.formatted || req.body.location || '',
@@ -176,6 +177,7 @@ export async function update(req: Request, res: Response) {
       categoryName: req.body.category || req.body.categoryName,
       bikeImages: files.map((file) => ({ imageUrl: normaliseImagePath(file.filename) })),
       existingImages,
+      autoAccept: req.body.autoAccept || false,
     };
 
     if (latitude !== null && longitude !== null) {

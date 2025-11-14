@@ -18,6 +18,7 @@ export const bikePresenter = (bike: any) => {
     },
     rentAmount: bike?.rentAmount,
     myBooking: bike?.myBooking,
+    autoAccept: bike?.autoAccept,
     pricePerHour: bike?.pricePerHour,
     pricePerDay: bike?.pricePerDay,
     rating: bike?.rating,

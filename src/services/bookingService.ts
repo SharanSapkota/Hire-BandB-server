@@ -30,25 +30,38 @@ export async function createBooking(payload: any, currentUser: any) {
   const bikeIdNumber = Number(bikeId);
   const findBooking = await bookingRepo.findBookingByBikeIdAndUserId(bikeIdNumber, currentUser.id);
   if (findBooking) throw new Error('Booking already exists');
-  const bike = await prisma.bike.findUnique({ where: { id: bikeIdNumber } });
+  const bike: any = await prisma.bike.findUnique({ where: { id: bikeIdNumber } });
   if (!bike) throw new Error('Bike not found');
+  const autoAccept = Boolean(bike.autoAccept) ?? false;
 
   const data = {
     userId: currentUser.id,
     bikeId: bikeIdNumber,
     ownerId: bike.ownerId,
-    status: 'PENDING',
+    status: autoAccept ? BOOKING_STATUS.APPROVED : BOOKING_STATUS.PENDING,
     startTime: startTime ? new Date(startTime) : null,
     endTime: endTime ? new Date(endTime) : null,
   };
   const created = await bookingRepo.createBooking(data);
   // compute primary email/name for currentUser
+
   const renterEmail = currentUser.emails && currentUser.emails.length ? currentUser.emails.find((e: any) => e.isPrimary)?.email || currentUser.emails[0].email : null;
   const renterName = [currentUser.firstName, currentUser.lastName].filter(Boolean).join(' ') || renterEmail;
-  // notify owner
-  await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, type: NOTIFICATION_TYPE.RENTAL_REQUEST, title: 'New booking', message: `Bike ${bike.name} was booked by ${renterName}` });
-  // notify renter
-  await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, type: NOTIFICATION_TYPE.RENTAL_REQUEST, title: 'Booking Created', message: `Your booking for bike ${bike.name} is pending` });
+  let notificationType = NOTIFICATION_TYPE.RENTAL_REQUEST;
+  let notificationTitleForOwner = 'New booking';
+  let notificationMessageForOwner = `Bike ${bike.name} was booked by ${renterName} because of auto accept`;
+  let notificationTitleForRenter = 'Booking Created (Waiting for approval)';
+  let notificationMessageForRenter = `Your booking for bike ${bike.name} is pending`;
+
+  if(autoAccept) {
+    notificationType = NOTIFICATION_TYPE.RENTAL_ACCEPTED;
+    notificationTitleForOwner = 'Booking Accepted By Auto Accept';
+    notificationMessageForOwner = `Your booking for bike ${bike.name} was accepted`;
+    notificationTitleForRenter = 'Booking Accepted By Auto Accept';
+    notificationMessageForRenter = `Your booking for bike ${bike.name} was accepted by auto accept`;
+  }
+  await notifService.createNotification({ userId: bike.ownerId, bookingId: created.id, type: notificationType, title: notificationTitleForOwner, message: notificationMessageForOwner });
+  await notifService.createNotification({ userId: currentUser.id, bookingId: created.id, type: notificationType, title: notificationTitleForRenter, message: notificationMessageForRenter });
   return created;
 }
 

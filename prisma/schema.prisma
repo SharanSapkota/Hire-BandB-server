@@ -78,6 +78,7 @@ model Bike {
   pricePerDay  Float?    @map("price_per_day")
   bikeImages  BikeImages[]
   bikeAddress BikeAddress[]
+  autoAccept  Boolean    @default(false)
   status      BikeStatus @default(AVAILABLE)
   startTime   DateTime?
   endTime     DateTime?

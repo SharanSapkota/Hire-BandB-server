@@ -7,6 +7,7 @@ export const bikeCreateDto = (bike: any) => {
     pricePerDay: bike.pricePerDay ?? null,
     status: bike.status ?? 'AVAILABLE',
     startTime: bike.startTime ?? null,
+    autoAccept: Boolean(bike.autoAccept )?? false,
     endTime: bike.endTime ?? null,
     ownerId: bike.ownerId,
     categoryId: bike.categoryId ?? null,
