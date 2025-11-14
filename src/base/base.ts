@@ -1,2 +1,3 @@
-// export const BASE_URL = 'http://localhost:4000';
-export const BASE_URL = 'https://gear-quest-hub.onrender.com';
+import { BACKEND_URL } from '../config/app.config';
+
+export const BASE_URL = BACKEND_URL;
