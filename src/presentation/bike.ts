@@ -17,6 +17,7 @@ export const bikePresenter = (bike: any) => {
         placeId: bike?.bikeAddress?.[0]?.placeId,
     },
     rentAmount: bike?.rentAmount,
+    myBooking: bike?.myBooking,
     pricePerHour: bike?.pricePerHour,
     pricePerDay: bike?.pricePerDay,
     rating: bike?.rating,

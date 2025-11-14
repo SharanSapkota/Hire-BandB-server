@@ -7,6 +7,7 @@ import { BikeQueryBuilder } from '../../queryBuilder/bikeQuery';
 import { QueryBuilder } from '../../queryBuilder/query';
 import { MEDIA_ROOT } from '../../middleware/upload';
 import * as bookingService from '../bookingService';
+import { BOOKING_STATUS } from '../../constants/bikeConstants';
 export class BikeService {
   constructor(private repo: BikeRepository) {
     this.repo = repo;
@@ -26,8 +27,10 @@ export class BikeService {
   }
 
   async getBike(id: number, currentUser: any) {
-    const myBike = await this.repo.findBikeById(id);
+    const myBike: any = await this.repo.findBikeById(id);
     const myBikeBookings = await bookingService.bookingsByBikeId(id, currentUser.id);
+    const myBooking = myBikeBookings.find((booking: any) => booking.status === BOOKING_STATUS.PENDING && booking.bikeId === id);
+    myBike.myBooking = myBooking ? true : false;
     return {
       ...myBike,
       bookings: myBikeBookings,

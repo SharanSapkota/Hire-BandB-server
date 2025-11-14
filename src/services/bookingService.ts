@@ -27,14 +27,15 @@ export async function getBooking(id: number) {
 
 export async function createBooking(payload: any, currentUser: any) {
   const { bikeId, startTime, endTime } = payload;
-  // ensure bike exists
-  const bike = await prisma.bike.findUnique({ where: { id: Number(bikeId) } });
-  if (!bike) throw new Error('bike_not_found');
+  const bikeIdNumber = Number(bikeId);
+  const findBooking = await bookingRepo.findBookingByBikeIdAndUserId(bikeIdNumber, currentUser.id);
+  if (findBooking) throw new Error('Booking already exists');
+  const bike = await prisma.bike.findUnique({ where: { id: bikeIdNumber } });
+  if (!bike) throw new Error('Bike not found');
 
-  // owner is bike.ownerId
   const data = {
     userId: currentUser.id,
-    bikeId: bike.id,
+    bikeId: bikeIdNumber,
     ownerId: bike.ownerId,
     status: 'PENDING',
     startTime: startTime ? new Date(startTime) : null,
@@ -70,7 +71,7 @@ export async function approveBooking(id: number, currentUser: any) {
   const updated = await bookingRepo.updateBooking(id, { status: BOOKING_STATUS.APPROVED });
 
   await notifService.markNotificationRead(booking.userId);
-  await notifService.createNotification({ userId: booking.userId, bookingId: updated.id, type: NOTIFICATION_TYPE.RENTAL_ACCEPTED, title: 'Booking accepted', message: `Your booking for bike ${booking.bike.name} was accepted` });
+  await notifService.updateNotification({bookingId: updated.id, type: NOTIFICATION_TYPE.RENTAL_ACCEPTED, title: 'Booking accepted', message: `Your booking for bike ${booking.bike.name} was accepted`, read: false });
   return updated;
 }
 

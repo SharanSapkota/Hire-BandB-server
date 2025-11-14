@@ -14,6 +14,14 @@ export async function getNotification(id: number) {
   return notifRepo.findNotificationById(id);
 }
 
+export const updateNotification = async (payload: any) => {
+  const notification = await notifRepo.updateNotification(payload.id, payload);
+  if (payload?.userId) {
+    emitToUser(payload.userId, OWNER_NOTIFICATION_EVENT, notification);
+  }
+  return notification;
+}
+
 export async function createNotification(payload: any) {
   const notification = await notifRepo.createNotification(payload);
   if (payload?.userId) {

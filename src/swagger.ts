@@ -1,4 +1,5 @@
 import swaggerJSDoc from 'swagger-jsdoc';
+import { BASE_URL } from './base/base';
 
 const options: swaggerJSDoc.Options = {
   definition: {
@@ -10,7 +11,7 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:4000',
+        url: BASE_URL
       },
     ],
     components: {

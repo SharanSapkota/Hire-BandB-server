@@ -1,3 +1,5 @@
+import { BookingStatus } from '@prisma/client';
+import { BOOKING_STATUS } from '../constants/bikeConstants';
 import prisma from '../prisma';
 
 export function findAllBookings() {
@@ -9,11 +11,15 @@ export function findBookingById(id: number) {
 }
 
 export function findMyBookings(userId: number) {
-  return prisma.booking.findMany({ where: { userId }, include: { user: true, bike: { include: { bikeAddress: true } }, owner: true } });
+  return prisma.booking.findMany({ where: { userId, status: BOOKING_STATUS.PENDING as BookingStatus }, include: { user: true, bike: { include: { bikeAddress: true } }, owner: true } });
 }
 
 export function findBookingsByBikeId(bikeId: number, userId: number) {
   return prisma.booking.findMany({ where: { bikeId, userId }, include: { user: true, bike: true, owner: true } });
+}
+
+export function findBookingByBikeIdAndUserId(bikeId: number, userId: number) {
+  return prisma.booking.findFirst({ where: { bikeId, userId, status: BOOKING_STATUS.PENDING as BookingStatus } });
 }
 
 export function createBooking(data: any) {

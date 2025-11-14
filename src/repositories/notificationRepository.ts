@@ -19,6 +19,9 @@ export function findNotificationById(id: number) {
   return prisma.notification.findUnique({ where: { id } });
 }
 
+export function updateNotification(bookingId: number, data: any) {
+  return prisma.notification.updateMany({ where: { bookingId }, data });
+}
 export function createNotification(data: any) {
   return prisma.notification.create({ data });
 }
