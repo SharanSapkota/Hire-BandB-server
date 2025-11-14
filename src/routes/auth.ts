@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as authController from '../controllers/authController';
 import { validateSignup, validateLogin } from '../utils/validation';
+import { rateLimitMiddleware } from '../middleware/rateLimit';
 
 const router = Router();
 /**
@@ -63,7 +64,7 @@ const router = Router();
  */
 router.post('/signup', validateSignup, authController.signup);
 router.post('/verify-email', authController.verifyEmail);
-router.post('/resend-verification', authController.resendVerification);
+router.post('/resend-verification', rateLimitMiddleware, authController.resendVerification);
 
 /**
  * @openapi

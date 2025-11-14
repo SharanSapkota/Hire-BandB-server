@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as bikeController from '../controllers/bikeController';
 import { authenticate } from '../middleware/auth';
 import { uploadBikeImages } from '../middleware/upload';
+import { rateLimitMiddleware } from '../middleware/rateLimit';
 
 const router = Router();
 /**
@@ -21,8 +22,8 @@ const router = Router();
  *               items:
  *                 $ref: '#/components/schemas/Bike'
  */
-router.get('/', bikeController.list);
-router.get('/:id', authenticate, bikeController.get);
+router.get('/', rateLimitMiddleware, authenticate, bikeController.list);
+router.get('/:id', rateLimitMiddleware, authenticate, bikeController.get);
 /**
  * @openapi
  * /api/bikes:
