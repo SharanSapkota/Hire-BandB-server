@@ -2,12 +2,12 @@ import crypto from 'crypto';
 import prisma from '../prisma';
 import { sendEmail } from '../utils/mailer';
 import bcrypt from 'bcrypt';
+import { FRONTEND_URL } from '../config/app.config';
 
 const TOKEN_EXPIRATION_HOURS = Number(process.env.PASSWORD_RESET_EXPIRATION_HOURS || 1);
-const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:8080';
 
 function buildResetUrl(token: string) {
-  const base = APP_BASE_URL.replace(/\/$/, '');
+  const base = FRONTEND_URL.replace(/\/$/, '');
   return `${base}/reset-password?token=${token}`;
 }
 

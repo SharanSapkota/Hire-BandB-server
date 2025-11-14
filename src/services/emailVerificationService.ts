@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 import prisma from '../prisma';
 import { sendEmail } from '../utils/mailer';
+import { BACKEND_URL } from '../config/app.config';
 
 const TOKEN_EXPIRATION_HOURS = Number(process.env.EMAIL_VERIFICATION_EXPIRATION_HOURS || 24);
-const APP_BASE_URL = 'https://gear-quest-hub.onrender.com';
 
 function buildVerificationUrl(token: string) {
-  const base = APP_BASE_URL.replace(/\/$/, '');
+  const base = BACKEND_URL.replace(/\/$/, '');
   return `${base}/verify-email?token=${token}`;
 }
 

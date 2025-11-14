@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import * as passwordResetService from '../services/passwordResetService';
 import { sendFailure, sendSuccess } from '../utils/response';
+import { FRONTEND_URL } from '../config/app.config';
 
 export async function signup(req: Request, res: Response) {
   try {
@@ -157,5 +158,35 @@ export async function resetPassword(req: Request, res: Response) {
     }
 
     return sendFailure(res, 'Could not reset password', 500);
+  }
+}
+
+export async function verifyEmailGet(req: Request, res: Response) {
+  try {
+    const { token } = req.query;
+    if (!token || typeof token !== 'string') {
+      return res.redirect(`${FRONTEND_URL}/verify-email?error=missing_token`);
+    }
+
+    // Verify the email
+    await authService.verifyEmail(token);
+    
+    // Redirect to frontend with success
+    return res.redirect(`${FRONTEND_URL}/verify-email?token=${token}&verified=true`);
+  } catch (error: any) {
+    console.error('verifyEmailGet error:', error);
+
+    let errorParam = 'error=verification_failed';
+
+    if (error.message === 'invalid_token') {
+      errorParam = 'error=invalid_token';
+    } else if (error.message === 'token_already_used') {
+      errorParam = 'error=token_already_used';
+    } else if (error.message === 'token_expired') {
+      errorParam = 'error=token_expired';
+    }
+
+    // Redirect to frontend with error
+    return res.redirect(`${FRONTEND_URL}/verify-email?token=${req.query.token || ''}&${errorParam}`);
   }
 }

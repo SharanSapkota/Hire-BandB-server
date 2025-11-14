@@ -30,11 +30,15 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
 import { MEDIA_ROOT } from './middleware/upload';
 import { initSocket } from './lib/socket';
+import * as authController from './controllers/authController';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/media', express.static(MEDIA_ROOT));
+
+// Email verification redirect route (GET request from email links)
+app.get('/verify-email', authController.verifyEmailGet);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/bikes', bikeRoutes);
