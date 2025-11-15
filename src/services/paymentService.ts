@@ -1,33 +1,28 @@
 import * as payRepo from '../repositories/paymentRepository';
+import { PaymentServiceAdapter } from './payment/adapter';
+import { StripePaymentService } from './payment/stripePayment';
 
-export function listPaymentMethods() {
-  return payRepo.findAllPaymentMethods();
-}
-
-export function getPaymentMethod(id: number) {
-  return payRepo.findPaymentMethodById(id);
-}
-
-export function createPaymentMethod(data: any) {
-  return payRepo.createPaymentMethod(data);
-}
-
-export function updatePaymentMethod(id: number, data: any) {
-  return payRepo.updatePaymentMethod(id, data);
-}
-
-export function deletePaymentMethod(id: number) {
-  return payRepo.deletePaymentMethod(id);
-}
-
-export function createPaymentTransaction(data: any) {
-  return payRepo.createPaymentTransaction(data);
-}
-
-export function getPaymentTransaction(id: number) {
-  return payRepo.findPaymentTransactionById(id);
-}
-
-export function listPaymentTransactions() {
-  return payRepo.listPaymentTransactions();
+export class PaymentService {
+  private paymentServiceAdapter: PaymentServiceAdapter;
+  constructor() {
+    this.paymentServiceAdapter = new PaymentServiceAdapter(new StripePaymentService());
+  }
+  async createPaymentTransaction(data: any) {
+    return await this.paymentServiceAdapter.createPaymentTransaction(data);
+  }
+  async listPaymentMethods() {
+    return payRepo.findAllPaymentMethods();
+  }
+  
+  async getPaymentMethod(id: number) {
+    return payRepo.findPaymentMethodById(id);
+  }
+  
+  async createPaymentMethod(data: any) {
+    return payRepo.createPaymentMethod(data);
+  }
+  
+  async updatePaymentMethod(id: number, data: any) {
+    return payRepo.updatePaymentMethod(id, data);
+  }
 }
