@@ -9,7 +9,7 @@ export class BikeRepository {
 
   }
 
-  async findBikeById(id: number, query: any = null) {
+  async findBikeById(id: any, query: any = null) {
       if (query) {
         query = query.build();
       } else {
