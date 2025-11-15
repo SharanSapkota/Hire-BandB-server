@@ -8,17 +8,22 @@ export class StripePaymentService extends PaymentService {
     }
 
     async createPaymentTransaction(data: any): Promise<any> {
-        const paymentIntent = await this.createPaymentIntent(data);
-        const paymentTransaction = await this.createStrpePayment({
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+        const stripe = new Stripe(secretKey || '');
+        const paymentIntent = await stripe.paymentIntents.create({
             amount: data.amount,
-            currency: data.currency,
-            paymentMethodId: data.paymentMethodId,
-            paymentStatus: 'PENDING',
-            paymentIntent: paymentIntent.id,
-            clientSecret: paymentIntent.client_secret,
+            currency: data.currency || 'EUR',
+            metadata: {
+                bookingId: data.bookingId,
+            },
         });
 
-        return paymentTransaction;
+        return {
+            paymentIntent: paymentIntent.id,
+            clientSecret: paymentIntent.client_secret,
+            amount: data.amount,
+            currency: data.currency || 'EUR',
+        };
     }
 
     async createPaymentIntent(data: any): Promise<any> {
@@ -26,6 +31,9 @@ export class StripePaymentService extends PaymentService {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: data.amount,
             currency: data.currency,
+            metadata: {
+                bookingId: data.bookingId,
+            },
         });
 
         return {
