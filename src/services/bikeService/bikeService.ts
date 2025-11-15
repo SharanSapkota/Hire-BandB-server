@@ -4,10 +4,10 @@ import { BikeRepository } from '../../repositories/bikeRepository';
 import prisma from '../../prisma';
 import { bikeAddressCreateDto, bikeCreateDto, bikeImagesCreateDto } from './mapper';
 import { BikeQueryBuilder } from '../../queryBuilder/bikeQuery';
-import { QueryBuilder } from '../../queryBuilder/query';
 import { MEDIA_ROOT } from '../../middleware/upload';
 import * as bookingService from '../bookingService';
 import { BOOKING_STATUS } from '../../constants/bikeConstants';
+import { ListBikeQueryBuilder } from '../../queryBuilder/bike/bike';
 export class BikeService {
   constructor(private repo: BikeRepository) {
     this.repo = repo;
@@ -26,8 +26,47 @@ export class BikeService {
     return this.repo.findAllBikes(listBikeQuery);
   }
 
-  async getBike(id: number, currentUser: any) {
-    const myBike: any = await this.repo.findBikeById(id);
+  async getBikeById(id: number) {
+    const builder = new ListBikeQueryBuilder(21)
+    .addRelation('bikeAddress')
+    .addRelation('bikeImages')
+    .addRelation('category')
+    .addRelation('owner', {
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        emails: {
+          where: { isPrimary: true },
+          select: { email: true }
+        }
+      }
+    });
+    
+  
+    const bike = await this.repo.findBikeById(id, builder);
+    console.log(bike);
+    return bike;
+  }
+
+  async getBikeByIdAndCurrentUser(id: number, currentUser: any) {
+    const builder = new ListBikeQueryBuilder(id);
+    const query = builder
+    .addRelation('bikeAddress')
+    .addRelation('bikeImages')
+    .addRelation('category')
+    .addRelation('owner', {
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        emails: {
+          where: { isPrimary: true },
+          select: { email: true }
+        }
+      }
+    });
+    const myBike: any = await this.repo.findBikeById(id, query);
     const myBikeBookings = await bookingService.bookingsByBikeId(id, currentUser.id);
     const myBooking = myBikeBookings.find((booking: any) => booking.status === BOOKING_STATUS.PENDING && booking.bikeId === id);
     myBike.myBooking = myBooking ? true : false;
