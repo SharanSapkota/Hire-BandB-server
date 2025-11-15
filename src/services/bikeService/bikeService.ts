@@ -26,8 +26,8 @@ export class BikeService {
     return this.repo.findAllBikes(listBikeQuery);
   }
 
-  async getBikeById(id: number) {
-    const builder = new ListBikeQueryBuilder(21)
+  async getBikeById(payload: any) {
+    const builder = new ListBikeQueryBuilder(payload.bikeId)
     .addRelation('bikeAddress')
     .addRelation('bikeImages')
     .addRelation('category')
@@ -44,8 +44,7 @@ export class BikeService {
     });
     
   
-    const bike = await this.repo.findBikeById(id, builder);
-    console.log(bike);
+    const bike = await this.repo.findBikeById(payload.bikeId, builder);
     return bike;
   }
 
