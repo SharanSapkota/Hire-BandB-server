@@ -22,7 +22,7 @@ export class CostCalculator implements BaseCostCalculator {
     calculateCostForRenter(data: any) {
         const { fromDate, toDate, bike } = data;
         let paymentUnit = 'daily'
-        const duration = differenceInDays(toDate, fromDate);
+        const duration = differenceInDays(new Date(fromDate), new Date(toDate));
         let cost = 0;
         paymentUnit = bike?.paymentUnit || 'daily';
         if(paymentUnit === 'hourly') {
@@ -36,7 +36,7 @@ export class CostCalculator implements BaseCostCalculator {
 
     calculateCostForAdmin(data: any) {
         const { fromDate, toDate, bike } = data;
-        const duration = differenceInDays(toDate, fromDate);
+        const duration = differenceInDays(new Date(fromDate), new Date(toDate));
         const cost = bike.rentAmount * duration * COMMISSION_PERCENTAGE/100;
 
         return cost;
