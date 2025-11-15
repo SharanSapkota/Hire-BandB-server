@@ -37,7 +37,7 @@ export async function get(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
     const currentUser = req.user;
-    const bike = await bikeService.getBike(id, currentUser);
+    const bike = await bikeService.getBikeByIdAndCurrentUser(id, currentUser);
     // const bookings = await bookingService.getBookingsByBikeIdAndUserId(id, currentUser.id);
     const presentableBike = bikePresenter(bike);
     if (!bike) return sendFailure(res, { error: ERROR_MESSAGES.NOT_FOUND }, 404);
