@@ -8,7 +8,7 @@ export const appConfig = {
   backendUrl: process.env.BACKEND_URL || process.env.BASE_URL || 'http://localhost:4000',
   
   // Frontend application URL (for email links and redirects)
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
+  frontendUrl: process.env.FRONTEND_URL || 'https://gear-quest-hub.onrender.com',
   
   // API base URL (backend URL + /api)
   apiBaseUrl: (process.env.BACKEND_URL || process.env.BASE_URL || 'http://localhost:4000') + '/api',
