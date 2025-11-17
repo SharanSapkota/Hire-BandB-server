@@ -1,9 +1,9 @@
-import { Router } from 'express';
-import * as upCtrl from '../controllers/userPaymentController';
+// import { Router } from 'express';
+// import * as upCtrl from '../controllers/userPaymentController';
 
-const router = Router();
+// const router = Router();
 
-router.get('/:userId', upCtrl.list);
-router.post('/:userId', upCtrl.create);
+// router.get('/:userId', upCtrl.list);
+// router.post('/:userId', upCtrl.create);
 
-export default router;
+// export default router;
