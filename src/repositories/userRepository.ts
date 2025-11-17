@@ -98,6 +98,18 @@ export async function createUserSecurity(userId: number, data: { password: strin
   return transaction.userSecurity.create({ data: { ...data, userId } });
 }
 
+export async function createUserPaymentMode(data: { type: string, name: string, isVerified: boolean, userId: number }) {
+  return prisma.userPaymentMode.create({ data: { ...data, isActive: true } });
+}
+
+export async function getUserPaymentModeByCustomerId(customerId: string) {
+  return prisma.userPaymentMode.findFirst({ where: { customerId } });
+}
+
+export async function updateUserPaymentMode(id: string, data: { isVerified: boolean }) {
+  return prisma.userPaymentMode.update({ where: { id }, data: { ...data } });
+}
+
 export async function findUserById(id: number) {
-  return prisma.user.findUnique({ where: { id }, include: { userRoles: { include: { role: true } }, UserType: true, emails: true } });
+  return prisma.user.findUnique({ where: { id }, include: { userRoles: { include: { role: true } }, paymentModes: true, emails: true, phones: true, details: true, bikes: true, bookings: true, ownerBookings: true, reviewsGiven: true, reviewsReceived: true, locations: true, productAssigned: true } });
 }
