@@ -8,6 +8,7 @@ export const userPresenter = (user: any): any => {
     lastName: user.lastName,
     phone: userPhonePresenter(user),
     email: userEmailPresenter(user),
+    stripeKycVerified: user?.paymentModes?.length > 0 && user?.paymentModes?.some((eachPaymentMode: any) => eachPaymentMode?.type === 'KYC' && eachPaymentMode?.isVerified),
     fullName: [user.firstName, user.secondName, user.lastName].filter(Boolean).join(' '),
     age: user.age,
     isActive: user.isActive,
