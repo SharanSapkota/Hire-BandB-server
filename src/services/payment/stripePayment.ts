@@ -16,6 +16,9 @@ export class StripePaymentService extends PaymentService {
             metadata: {
                 bookingId: data.bookingId,
             },
+            transfer_data: {
+                destination: data.receiverStripeAccountId,
+              },
         });
 
         return {
