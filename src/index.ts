@@ -31,6 +31,7 @@ import swaggerSpec from './swagger';
 import { MEDIA_ROOT } from './middleware/upload';
 import { initSocket } from './lib/socket';
 import * as authController from './controllers/authController';
+import stripeRoutes from './routes/stripe';
 
 const app = express();
 app.use(cors());
@@ -63,6 +64,7 @@ app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/permission-mappings', permissionMappingRoutes);
 app.use('/api/user-emails', userEmailRoutes);
 app.use('/api/file-upload', fileUploadRoute);
+app.use('/api/stripe', stripeRoutes);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
