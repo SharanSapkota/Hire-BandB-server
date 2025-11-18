@@ -1,12 +1,15 @@
 import * as userRepo from '../repositories/userRepository';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import prisma from '../prisma';
+import { v4 as uuidv4 } from "uuid";
+import { RefreshTokenRecord } from '../types/auth';
+import { createRefreshToken } from '../repositories/userRepository';
 import {
   createVerificationToken,
   sendVerificationEmail,
   verifyToken as consumeVerificationToken,
 } from './emailVerificationService';
+import { hashRefreshToken } from '../utils/auth';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
 
@@ -169,4 +172,67 @@ export async function forgotPassword(email: string) {
   await sendPasswordResetEmail(targetEmail, resetToken.token);
 
   return { success: true };
+}
+
+export async function loginV2(payload: { email: string; password: string }) {
+  try {
+    const user = await userRepo.findUserByEmail(payload.email);
+    if (!user) {
+      throw new Error('user_not_found');
+    }
+    const isPasswordValid = await bcrypt.compare(payload.password, user.password);
+    if (!isPasswordValid) {
+      throw new Error('invalid_credentials');
+    }
+
+    if (!user.isEmailVerified) {
+      throw new Error('email_not_verified');
+    }
+
+    // Get user role
+    const role = user.userRoles && user.userRoles.length ? user.userRoles[0].role : null;
+    const roleCode = role ? role.code : 'USER';
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        userId: user.id, 
+        role: roleCode,
+        email: payload.email 
+      }, 
+      JWT_SECRET, 
+      { expiresIn: '7d' }
+    );
+
+    const refreshId = uuidv4();
+    const refreshPlain = uuidv4() + "." + uuidv4();
+  
+    const tokenHash = await hashRefreshToken(refreshPlain);
+    await createRefreshToken({
+      id: refreshId,
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10), // 10 days
+      revoked: false,
+    });
+
+    // Get primary email
+    const primaryEmail = user.emails && user.emails.length 
+      ? (user.emails.find((e: any) => e.isPrimary)?.email || user.emails[0].email) 
+      : payload.email;
+
+    return {
+      settingHttpCookie: JSON.stringify({ id: refreshId, token: refreshPlain }),
+      user: { 
+        id: user.id, 
+        email: primaryEmail, 
+        name: userDisplayName(user),
+        role: roleCode
+      }, 
+      token 
+    }
+  } catch (error: any) {
+    console.error('LoginV2 error:', error);
+    throw error;
+  }
 }

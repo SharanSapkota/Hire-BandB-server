@@ -66,7 +66,7 @@ router.post('/signup', validateSignup, authController.signup);
 router.post('/verify-email', authController.verifyEmail);
 router.post('/resend-verification', rateLimitMiddleware, authController.resendVerification);
 
-/**
+/** 
  * @openapi
  * /api/auth/login:
  *   post:
@@ -119,6 +119,8 @@ router.post('/resend-verification', rateLimitMiddleware, authController.resendVe
  *         description: Internal server error
  */
 router.post('/login', validateLogin, authController.login);
+router.post('/v2/login', validateLogin, authController.loginV2);
+
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 

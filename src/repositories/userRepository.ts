@@ -98,6 +98,10 @@ export async function createUserSecurity(userId: number, data: { password: strin
   return transaction.userSecurity.create({ data: { ...data, userId } });
 }
 
+export async function createRefreshToken(data: any) {
+  return prisma.refreshToken.create({ data: { ...data } });
+}
+
 export async function createUserPaymentMode(data: { type: string, name: string, isVerified: boolean, userId: number }) {
   return prisma.userPaymentMode.create({ data: { ...data, isActive: true } });
 }
