@@ -30,6 +30,7 @@ model User {
   age                         Int?
   isActive                    Boolean              @default(true) @map("is_active")
   isEmailVerified             Boolean              @default(false)
+  refreshTokens               RefreshToken[]
   emails                      UserEmail[]
   phones                      UserPhone[]
   notifications               Notification[]   @relation("UserNotifications")
@@ -62,6 +63,26 @@ model User {
   passwordResets              PasswordReset[]
 }
 
+model RefreshToken {
+  id            String     @id @default(cuid())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+
+  tokenHash     String     
+  expiresAt     DateTime   
+  revoked       Boolean    @default(false)
+
+  ipAddress     String?    
+  userAgent     String?   
+  fingerprint   String?    
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
 model Category {
   id      Int       @id @default(autoincrement())
   name    String    @unique()
@@ -86,6 +107,7 @@ model Bike {
   categoryId  Int?
   owner       User       @relation(fields: [ownerId], references: [id])
   ownerId     Int
+  isActive    Boolean    @default(true)
   bookings    Booking[]  @relation("bikeBookings")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -95,7 +117,8 @@ model BikeImages {
   id          Int        @id  @default(autoincrement())
   bike        Bike       @relation(fields: [bikeId], references:[id])
   bikeId      Int
-  imageUrl      String
+  imageUrl    String
+  isActive    Boolean    @default(true)
 }
 
 model BikeAddress {
@@ -139,6 +162,7 @@ model Booking {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   notifications Notification[]
+  isActive      Boolean        @default(true)
   paymentTransaction   PaymentTransaction? @relation("BookingPayment", fields: [paymentTransactionId], references: [id])
   paymentTransactionId Int?                @unique
 }
@@ -156,6 +180,7 @@ model Notification {
   message    String
   read       Boolean   @default(false)
   readAt     DateTime?
+  isActive   Boolean   @default(true)
   createdAt  DateTime  @default(now())
 }
 
