@@ -30,9 +30,9 @@ type RelationConfig = {
       return include;
     }
   
-    build(): { where: { id?: number }, include: Record<string, any> } {
+    build(): { where: { id?: number, isActive?: boolean }, include: Record<string, any> } {
       return {
-        where: this.id ? { id: this.id } : {},
+        where: this.id ? { id: this.id, isActive: true } : { isActive: true },
         include: this.buildInclude(),
       };
     }

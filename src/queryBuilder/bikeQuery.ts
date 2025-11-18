@@ -47,7 +47,7 @@ export class BikeQueryBuilder {
             }
         };
 
-        const where: any = {};
+        const where: any = { isActive: true };
 
         if (this.query?.ownerId) {
             const ownerId = Number(this.query.ownerId);
