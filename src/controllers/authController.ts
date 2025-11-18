@@ -48,6 +48,52 @@ export async function login(req: Request, res: Response) {
   }
 }
 
+
+const REFRESH_COOKIE = "refresh_token";
+
+const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "lax" as const,
+  path: "/api/auth/refresh",
+  maxAge: 1000 * 60 * 60 * 24 * 10, // 10 days
+};
+
+
+export async function loginV2(req: Request, res: Response) {
+  try {
+    const result = await authService.loginV2(req.body);
+    res.cookie(
+      REFRESH_COOKIE,
+      result.settingHttpCookie,
+      {
+        ...REFRESH_COOKIE_OPTIONS,
+        secure: process.env.NODE_ENV === 'production',
+      }
+    );
+    sendSuccess(res, result);
+  } catch (err: any) {
+    console.error('LoginV2 controller error:', err);
+    
+    if (err.message === 'invalid_credentials') {
+      sendFailure(res, 'Invalid credentials', 401);
+      return;
+    }
+
+    if (err.message === 'email_not_verified') {
+      sendFailure(res, 'Please verify your email before logging in', 403);
+      return;
+    }
+
+    if (err.message === 'user_not_found') {
+      sendFailure(res, 'Invalid credentials', 401);
+      return;
+    }
+
+    sendFailure(res, 'An unexpected error occurred during login', 500);
+  }
+}
+
 export async function verifyEmail(req: Request, res: Response) {
   try {
     const { token } = req.body;
