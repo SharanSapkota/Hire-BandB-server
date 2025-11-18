@@ -6,7 +6,7 @@ import { bikeAddressCreateDto, bikeCreateDto, bikeImagesCreateDto } from './mapp
 import { BikeQueryBuilder } from '../../queryBuilder/bikeQuery';
 import { MEDIA_ROOT } from '../../middleware/upload';
 import * as bookingService from '../bookingService';
-import { BOOKING_STATUS } from '../../constants/bikeConstants';
+import { ACCEPT_BOOKING_STATUS } from '../../constants/bikeConstants';
 import { ListBikeQueryBuilder } from '../../queryBuilder/bike/bike';
 export class BikeService {
   constructor(private repo: BikeRepository) {
@@ -67,7 +67,7 @@ export class BikeService {
     });
     const myBike: any = await this.repo.findBikeById(id, query);
     const myBikeBookings = await bookingService.bookingsByBikeId(id, currentUser.id);
-    const myBooking = myBikeBookings.find((booking: any) => booking.status === BOOKING_STATUS.PENDING && booking.bikeId === id);
+    const myBooking = myBikeBookings.find((booking: any) => ACCEPT_BOOKING_STATUS.includes(booking.status) && booking.bikeId === id);
     myBike.myBooking = myBooking ? true : false;
     return {
       ...myBike,
