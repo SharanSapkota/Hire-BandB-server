@@ -71,7 +71,7 @@ model RefreshToken {
   tokenHash     String     
   expiresAt     DateTime   
   revoked       Boolean    @default(false)
-
+  reason        String?
   ipAddress     String?    
   userAgent     String?   
   fingerprint   String?    
