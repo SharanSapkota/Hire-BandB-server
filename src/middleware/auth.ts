@@ -4,14 +4,52 @@ import prisma from '../prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
 
+// export async function authenticate(req: Request, res: Response, next: NextFunction) {
+//   const auth = req.headers.authorization as string | undefined;
+//   if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'missing token' });
+//   const token = auth.split(' ')[1];
+//   try {
+//   const decoded: any = jwt.verify(token, JWT_SECRET);
+//   const user = await prisma.user.findUnique({ where: { id: decoded.userId }, include: { userRoles: { include: { role: true } }, UserType: true, emails: true } });
+//     if (!user) return res.status(401).json({ error: 'invalid token' });
+//     req.user = user;
+//     next();
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(401).json({ error: 'invalid token' });
+//   }
+// }
+
+// export async function authenticateRefreshToken(req: Request, res: Response, next: NextFunction) {
+//   const token = req.cookies?.token; // assuming your cookie name is "token"
+  
+//   if (!token) return res.status(401).json({ error: 'missing token' });
+//   try {
+//     const decoded: any = jwt.verify(token, JWT_SECRET);
+//     const user = await prisma.user.findUnique({ where: { id: decoded.userId }, include: { userRoles: { include: { role: true } }, UserType: true, emails: true } });
+//   }
+// }
+
 export async function authenticate(req: Request, res: Response, next: NextFunction) {
-  const auth = req.headers.authorization as string | undefined;
-  if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'missing token' });
-  const token = auth.split(' ')[1];
+  // Grab token from httpOnly cookie
+  const token = req.headers.authorization?.split(' ')[1];
+  // const token = req.cookies?.token; // assuming your cookie name is "token"
+  
+  if (!token) return res.status(401).json({ error: 'missing token' });
+
   try {
-  const decoded: any = jwt.verify(token, JWT_SECRET);
-  const user = await prisma.user.findUnique({ where: { id: decoded.userId }, include: { userRoles: { include: { role: true } }, UserType: true, emails: true } });
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      include: {
+        userRoles: { include: { role: true } },
+        UserType: true,
+        emails: true
+      }
+    });
+
     if (!user) return res.status(401).json({ error: 'invalid token' });
+
     req.user = user;
     next();
   } catch (err) {
