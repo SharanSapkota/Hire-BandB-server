@@ -2,8 +2,8 @@ import * as userRepo from '../repositories/userRepository';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from "uuid";
-import { RefreshTokenRecord } from '../types/auth';
 import { createRefreshToken } from '../repositories/userRepository';
+import argon2 from 'argon2';
 import {
   createVerificationToken,
   sendVerificationEmail,
@@ -81,15 +81,54 @@ export async function signup(payload: any) {
   }
 }
 
+export async function processRefresh(id: string, token: string) {
+  const stored: any = await userRepo.findRefreshTokenById(id);
+
+    if (!stored) {
+      throw new Error("Refresh token not found");
+    }
+
+    // if (stored.revoked) throw new Error("Refresh token revoked");
+    if (stored.expiresAt < new Date()) throw new Error("Refresh token expired");
+
+    const valid = await argon2.verify(stored.tokenHash, token);
+    if (!valid) throw new Error("Invalid refresh token");
+
+    // const newPlainToken = uuidv4();
+    // const newTokenHash = await argon2.hash(newPlainToken);
+
+    // const newRefresh = await userRepo.createRefreshToken({
+    //   userId: stored.userId,
+    //   tokenHash: newTokenHash,
+    //   expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10), // 10 days
+    //   revoked: false,
+    // });
+
+    const accessToken = jwt.sign(
+      { userId: stored.userId },
+      JWT_SECRET,
+      { expiresIn: "20m" }
+    );
+
+    return {
+      accessToken,
+      newCookieData: { id: stored.id, token: stored.tokenHash },
+      cookieOptions: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 1000 * 60 * 60 * 24 * 10, // 10 days
+        sameSite: 'strict',
+      },
+    };
+}
+
 export async function login(payload: { email: string; password: string }) {
   try {
-    // Find user by email
     const user = await userRepo.findUserByEmail(payload.email);
     if (!user) {
       throw new Error('invalid_credentials');
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(payload.password, user.password);
     if (!isPasswordValid) {
       throw new Error('invalid_credentials');
@@ -174,6 +213,10 @@ export async function forgotPassword(email: string) {
   return { success: true };
 }
 
+export async function revokeRefreshToken(id: string, reason: string) {
+  return await userRepo.revokeRefreshToken(id, reason);
+}
+
 export async function loginV2(payload: { email: string; password: string }) {
   try {
     const user = await userRepo.findUserByEmail(payload.email);
@@ -201,7 +244,7 @@ export async function loginV2(payload: { email: string; password: string }) {
         email: payload.email 
       }, 
       JWT_SECRET, 
-      { expiresIn: '7d' }
+      { expiresIn: '20m' }
     );
 
     const refreshId = uuidv4();
