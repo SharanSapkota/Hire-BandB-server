@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as authController from '../controllers/authController';
 import { validateSignup, validateLogin } from '../utils/validation';
 import { rateLimitMiddleware } from '../middleware/rateLimit';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 /**
@@ -118,8 +119,10 @@ router.post('/resend-verification', rateLimitMiddleware, authController.resendVe
  *       500:
  *         description: Internal server error
  */
+router.post('/vlogin', validateLogin, authController.loginV2);
+router.post('/logout', authController.logout);
+router.post("/refresh", authController.refresh);
 router.post('/login', validateLogin, authController.login);
-router.post('/v2/login', validateLogin, authController.loginV2);
 
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
