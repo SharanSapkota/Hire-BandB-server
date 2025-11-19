@@ -3,6 +3,7 @@ import * as authService from '../services/authService';
 import * as passwordResetService from '../services/passwordResetService';
 import { sendFailure, sendSuccess } from '../utils/response';
 import { FRONTEND_URL } from '../config/app.config';
+import * as userRepo from '../repositories/userRepository';
 
 export async function signup(req: Request, res: Response) {
   try {
@@ -24,6 +25,44 @@ export async function signup(req: Request, res: Response) {
     }
 
     return sendFailure(res, err.message ?? 'An unexpected error occurred during signup', 500);
+  }
+}
+
+export async function refresh(req: Request, res: Response) {
+  try {
+    const cookie = req.cookies[REFRESH_COOKIE];
+
+    if (!cookie) {
+      return sendFailure(res, "No refresh token", 401);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cookie);
+    } catch {
+      return sendFailure(res, "Invalid cookie format", 400);
+    }
+
+    const { id, token } = parsed;
+
+    if (!id || !token) {
+      return sendFailure(res, "Invalid refresh token", 401);
+    }
+
+    const { accessToken, newCookieData, cookieOptions } =
+      await authService.processRefresh(id, token);
+
+    await res.cookie(REFRESH_COOKIE, JSON.stringify(newCookieData), {
+      ...cookieOptions,
+      secure: true,
+      sameSite: 'strict' as const,
+    });
+
+    return sendSuccess(res, { accessToken }, 200);
+
+  } catch (err) {
+    console.error("Refresh controller error:", err);
+    return sendFailure(res, "Internal error", 500);
   }
 }
 
@@ -59,16 +98,37 @@ const REFRESH_COOKIE_OPTIONS = {
   maxAge: 1000 * 60 * 60 * 24 * 10, // 10 days
 };
 
+export async function logout(req: Request, res: Response) {
+  try {
+    if(!req.cookies) {
+      return sendFailure(res, "No cookies", 400);
+    }
+    const cookie = req.cookies[REFRESH_COOKIE];
+    if (cookie) {
+      try {
+        const { id } = JSON.parse(cookie);
+        await authService.revokeRefreshToken(id, 'user_logout');
+      } catch (e) {}
+    }
+    res.clearCookie(REFRESH_COOKIE, { path: '/auth/refresh' });
+    sendSuccess(res, { ok: true });
+  } catch (err: any) {
+    console.error('Logout controller error:', err);
+    sendFailure(res, 'An unexpected error occurred during logout', 500);
+  }
+}
+
 
 export async function loginV2(req: Request, res: Response) {
   try {
     const result = await authService.loginV2(req.body);
+    console.log('result', result);
     res.cookie(
       REFRESH_COOKIE,
       result.settingHttpCookie,
       {
         ...REFRESH_COOKIE_OPTIONS,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
       }
     );
     sendSuccess(res, result);
