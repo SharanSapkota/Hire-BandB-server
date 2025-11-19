@@ -32,10 +32,23 @@ import { MEDIA_ROOT } from './middleware/upload';
 import { initSocket } from './lib/socket';
 import * as authController from './controllers/authController';
 import stripeRoutes from './routes/stripe';
+import { FRONTEND_URL } from './config/app.config';
+import cookieParser from 'cookie-parser';
 
 const app = express();
-app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+  origin: [
+    'http://localhost:8080',        
+    'https://bike-hive-hub.onrender.com', 
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Set-Cookie'],
+}));
+
 app.use('/media', express.static(MEDIA_ROOT));
 
 // Email verification redirect route (GET request from email links)
@@ -66,7 +79,6 @@ app.use('/api/user-emails', userEmailRoutes);
 app.use('/api/file-upload', fileUploadRoute);
 app.use('/api/stripe', stripeRoutes);
 
-// Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req: Request, res: Response) => res.json({ ok: true }));
