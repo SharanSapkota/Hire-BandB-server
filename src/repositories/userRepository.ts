@@ -6,6 +6,10 @@ export async function findUserByEmail(email: string) {
   return userList;
 }
 
+export async function findRefreshTokenById(id: string) {
+  return prisma.refreshToken.findUnique({ where: { id } });
+}
+
 export async function findUserByPhone(phone: string) {
   // phone is stored in UserPhone
   const userList = await prisma.user.findFirst({ where: { phones: { some: { phone } } }, include: { userRoles: { include: { role: true } }, UserType: true, phones: true } });
@@ -96,6 +100,10 @@ export async function createUserPhone(userId: number, data: { phone: string; isP
 
 export async function createUserSecurity(userId: number, data: { password: string }, transaction: any) {
   return transaction.userSecurity.create({ data: { ...data, userId } });
+}
+
+export async function revokeRefreshToken(id: string, reason: string) {
+  return prisma.refreshToken.update({ where: { id }, data: { revoked: true, reason } });
 }
 
 export async function createRefreshToken(data: any) {
