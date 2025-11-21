@@ -41,7 +41,7 @@ app.use(cookieParser());
 app.use(cors({
   origin: [
     'http://localhost:8080',        
-    'https://bike-hive-hub.onrender.com', 
+    'https://gear-quest-hub.onrender.com', 
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
