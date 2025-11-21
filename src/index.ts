@@ -40,7 +40,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
   origin: [
-    '*',
+    'https://bike-hive-hub.lovable.app',
     'http://localhost:8080',        
     'https://gear-quest-hub.onrender.com', 
   ],
