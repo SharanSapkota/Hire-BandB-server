@@ -52,10 +52,11 @@ export async function refresh(req: Request, res: Response) {
     const { accessToken, newCookieData, cookieOptions } =
       await authService.processRefresh(id, token);
 
-    await res.cookie(REFRESH_COOKIE, JSON.stringify(newCookieData), {
-      ...cookieOptions,
-      secure: true,
-      sameSite: 'strict' as const,
+    res.cookie(REFRESH_COOKIE, JSON.stringify(newCookieData), {
+      ...REFRESH_COOKIE_OPTIONS,
+      ...cookieOptions, // Merge any additional options from service
+      secure: true, // Ensure secure is always true
+      sameSite: 'none' as const, // Required for cross-origin - this overrides everything
     });
 
     return sendSuccess(res, { accessToken }, 200);
@@ -92,9 +93,9 @@ const REFRESH_COOKIE = "refresh_token";
 
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: true,
-  sameSite: "lax" as const,
-  path: "/api/auth/refresh",
+  secure: true, // Required for sameSite: 'none'
+  sameSite: "none" as const, // Required for cross-origin cookies
+  path: "/", // Set to root so it works across all routes
   maxAge: 1000 * 60 * 60 * 24 * 10, // 10 days
 };
 
@@ -110,7 +111,12 @@ export async function logout(req: Request, res: Response) {
         await authService.revokeRefreshToken(id, 'user_logout');
       } catch (e) {}
     }
-    res.clearCookie(REFRESH_COOKIE, { path: '/auth/refresh' });
+    res.clearCookie(REFRESH_COOKIE, { 
+      path: '/', // Must match the cookie path
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none' as const
+    });
     sendSuccess(res, { ok: true });
   } catch (err: any) {
     console.error('Logout controller error:', err);
